@@ -1,5 +1,13 @@
 import type { Project } from "./types";
 
+// Simple placeholder "screenshot" graphics so the gallery/lightbox has
+// something to display until real screenshots are dropped into
+// src/assets/projects/. Swap Project.media.images for real file paths.
+function placeholderScreenshot(label: string, color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="640" height="400" fill="${color}"/><text x="320" y="200" font-family="sans-serif" font-size="28" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 // PLACEHOLDER CONTENT — swap in real projects. Fields are optional and the
 // UI hides whatever isn't provided, so partial entries are fine.
 export const projects: Project[] = [
@@ -12,6 +20,12 @@ export const projects: Project[] = [
     technologies: ["TypeScript", "Phaser", "Vite"],
     links: {
       github: "https://github.com/your-username/project-one",
+    },
+    media: {
+      images: [
+        placeholderScreenshot("Screenshot 1", "#7a5230"),
+        placeholderScreenshot("Screenshot 2", "#3c5a73"),
+      ],
     },
     featured: true,
   },

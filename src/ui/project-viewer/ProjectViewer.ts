@@ -4,12 +4,17 @@ import type { Project } from "@/portfolio/data/types";
 /**
  * List -> detail project browser. Every field on Project is optional except
  * title/shortDescription/description/technologies, and this renderer hides
- * whatever isn't provided rather than showing empty sections.
+ * whatever isn't provided rather than showing empty sections. Featured
+ * projects (Project.featured) surface first with a badge.
  */
 export function renderProjectViewer(items: Project[]): HTMLElement {
   const container = el("div", "project-viewer");
   showList(container, items);
   return container;
+}
+
+function sortedByFeatured(items: Project[]): Project[] {
+  return [...items].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
 }
 
 function showList(container: HTMLElement, items: Project[]): void {
@@ -20,8 +25,9 @@ function showList(container: HTMLElement, items: Project[]): void {
   }
 
   const grid = el("div", "project-grid");
-  for (const project of items) {
+  for (const project of sortedByFeatured(items)) {
     const card = el("article", "project-card");
+    if (project.featured) card.append(el("span", "project-card__badge", "★ Featured"));
     card.append(el("h3", "project-card__title", project.title));
     card.append(el("p", "project-card__desc", project.shortDescription));
 
@@ -48,7 +54,11 @@ function showDetail(container: HTMLElement, project: Project, allItems: Project[
   container.append(backButton);
 
   const detail = el("div", "project-detail");
-  detail.append(el("h3", "project-detail__title", project.title));
+  const titleRow = el("div", "project-detail__title-row");
+  titleRow.append(el("h3", "project-detail__title", project.title));
+  if (project.featured) titleRow.append(el("span", "project-card__badge", "★ Featured"));
+  detail.append(titleRow);
+
   detail.append(el("p", "section-paragraph", project.description));
 
   if (project.technologies.length) {
@@ -69,10 +79,15 @@ function showDetail(container: HTMLElement, project: Project, allItems: Project[
   if (project.media?.images?.length) {
     const gallery = el("div", "project-detail__gallery");
     for (const src of project.media.images) {
+      const thumb = el("button", "project-detail__thumb");
+      thumb.type = "button";
+      thumb.setAttribute("aria-label", `Enlarge screenshot of ${project.title}`);
       const img = el("img", "project-detail__image");
       img.src = src;
       img.alt = `${project.title} screenshot`;
-      gallery.append(img);
+      thumb.append(img);
+      thumb.addEventListener("click", () => openLightbox(src, img.alt));
+      gallery.append(thumb);
     }
     detail.append(gallery);
   }
@@ -85,4 +100,34 @@ function showDetail(container: HTMLElement, project: Project, allItems: Project[
   }
 
   container.append(detail);
+}
+
+function openLightbox(src: string, alt: string): void {
+  const overlay = el("div", "lightbox");
+  const img = el("img", "lightbox__image");
+  img.src = src;
+  img.alt = alt;
+  const closeButton = el("button", "lightbox__close", "✕");
+  closeButton.setAttribute("aria-label", "Close image preview");
+
+  const close = () => {
+    overlay.remove();
+    document.removeEventListener("keydown", onKeydown, true);
+  };
+  closeButton.addEventListener("click", close);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  // Capture phase + stopPropagation so this Escape doesn't also reach the
+  // underlying Panel's own Escape listener and close the whole panel.
+  const onKeydown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      close();
+    }
+  };
+  document.addEventListener("keydown", onKeydown, true);
+
+  overlay.append(img, closeButton);
+  document.body.append(overlay);
 }
