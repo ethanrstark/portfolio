@@ -6,12 +6,56 @@ import { skills } from "@/portfolio/data/skills";
 import { links } from "@/portfolio/data/links";
 import type { LinkEntry } from "@/portfolio/data/types";
 
+export const LINK_ICONS: Record<LinkEntry["kind"], string> = {
+  github: "\u{1F419}",
+  linkedin: "\u{1F4BC}",
+  email: "✉️",
+  website: "\u{1F310}",
+  twitter: "\u{1F426}",
+  other: "\u{1F517}",
+};
+
+function initials(name: string): string {
+  const words = name.split(/\s+/).filter(Boolean);
+  return words
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+}
+
 export function renderAbout(): HTMLElement {
   const container = el("div", "section-content");
-  container.append(el("p", "section-tagline", aboutInfo.tagline));
+
+  const header = el("div", "about-header");
+  header.append(el("div", "about-header__avatar", initials(aboutInfo.name)));
+  const headerText = el("div", "about-header__text");
+  headerText.append(
+    el("h3", "about-header__name", aboutInfo.name),
+    el("p", "section-tagline", aboutInfo.tagline),
+  );
+  header.append(headerText);
+  container.append(header);
+
   for (const paragraph of aboutInfo.bio) {
     container.append(el("p", "section-paragraph", paragraph));
   }
+
+  if (links.length) {
+    const quickLinks = el("div", "about-quick-links");
+    for (const link of links) {
+      const item = el("a", "about-quick-links__item", LINK_ICONS[link.kind]);
+      item.href = link.url;
+      item.title = link.label;
+      item.setAttribute("aria-label", link.label);
+      if (link.kind !== "email") {
+        item.target = "_blank";
+        item.rel = "noopener noreferrer";
+      }
+      quickLinks.append(item);
+    }
+    container.append(quickLinks);
+  }
+
   if (aboutInfo.funFacts?.length) {
     container.append(el("h3", "section-subheading", "Fun Facts"));
     const list = el("ul", "bullet-list");
@@ -76,27 +120,39 @@ export function renderSkills(): HTMLElement {
   return container;
 }
 
-const LINK_ICONS: Record<LinkEntry["kind"], string> = {
-  github: "\u{1F419}",
-  linkedin: "\u{1F4BC}",
-  email: "✉️",
-  website: "\u{1F310}",
-  twitter: "\u{1F426}",
-  other: "\u{1F517}",
-};
-
 export function renderLinks(): HTMLElement {
   const container = el("div", "section-content");
   container.append(el("p", "section-paragraph", "The best ways to reach me or see more of my work."));
   const list = el("div", "links-list");
   for (const link of links) {
-    const row = el("a", "links-list__item");
-    row.href = link.url;
+    const row = el("div", "links-list__item");
+    const anchor = el("a", "links-list__item-link");
+    anchor.href = link.url;
     if (link.kind !== "email") {
-      row.target = "_blank";
-      row.rel = "noopener noreferrer";
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
     }
-    row.append(el("span", "links-list__icon", LINK_ICONS[link.kind]), el("span", "links-list__label", link.label));
+    anchor.append(el("span", "links-list__icon", LINK_ICONS[link.kind]), el("span", "links-list__label", link.label));
+    row.append(anchor);
+
+    if (link.kind === "email") {
+      const copyButton = el("button", "links-list__copy", "Copy");
+      copyButton.type = "button";
+      copyButton.addEventListener("click", async () => {
+        const email = link.url.replace(/^mailto:/, "");
+        try {
+          await navigator.clipboard.writeText(email);
+          copyButton.textContent = "Copied!";
+        } catch {
+          copyButton.textContent = "Copy failed";
+        }
+        window.setTimeout(() => {
+          copyButton.textContent = "Copy";
+        }, 1500);
+      });
+      row.append(copyButton);
+    }
+
     list.append(row);
   }
   container.append(list);
