@@ -1,4 +1,5 @@
 import { createRng } from "./rng";
+import { AssetKeys } from "@/game/systems/AssetKeys";
 import type {
   BuildingConfig,
   RegionConfig,
@@ -36,7 +37,7 @@ export const BUILDINGS: BuildingConfig[] = [
     width: 300,
     height: 240,
     tier: "large",
-    theme: "about",
+    spriteKey: "variant1",
   },
   {
     id: "building-projects",
@@ -47,7 +48,7 @@ export const BUILDINGS: BuildingConfig[] = [
     width: 300,
     height: 240,
     tier: "large",
-    theme: "projects",
+    spriteKey: "variant2",
   },
   {
     id: "building-education",
@@ -58,7 +59,7 @@ export const BUILDINGS: BuildingConfig[] = [
     width: 240,
     height: 200,
     tier: "medium",
-    theme: "education",
+    spriteKey: "variant1",
   },
   {
     id: "building-experience",
@@ -69,7 +70,7 @@ export const BUILDINGS: BuildingConfig[] = [
     width: 240,
     height: 200,
     tier: "medium",
-    theme: "experience",
+    spriteKey: "variant2",
   },
   {
     id: "building-skills",
@@ -80,7 +81,7 @@ export const BUILDINGS: BuildingConfig[] = [
     width: 170,
     height: 150,
     tier: "small",
-    theme: "skills",
+    spriteKey: "variant1",
   },
   {
     id: "building-links",
@@ -91,7 +92,7 @@ export const BUILDINGS: BuildingConfig[] = [
     width: 170,
     height: 150,
     tier: "small",
-    theme: "links",
+    spriteKey: "variant2",
   },
   {
     id: "building-creative",
@@ -102,7 +103,7 @@ export const BUILDINGS: BuildingConfig[] = [
     width: 200,
     height: 170,
     tier: "small",
-    theme: "creative",
+    spriteKey: "variant1",
   },
 ];
 
@@ -243,8 +244,9 @@ function scatter(
   count: number,
   bounds: { x: number; y: number; width: number; height: number },
   idPrefix: string,
-  scaleRange: [number, number] = [0.85, 1.15],
+  options: { scaleRange?: [number, number]; variants?: readonly string[] } = {},
 ): DecorationConfig[] {
+  const { scaleRange = [0.85, 1.15], variants } = options;
   const items: DecorationConfig[] = [];
   for (let i = 0; i < count; i++) {
     items.push({
@@ -253,6 +255,7 @@ function scatter(
       x: bounds.x + rng() * bounds.width,
       y: bounds.y + rng() * bounds.height,
       scale: scaleRange[0] + rng() * (scaleRange[1] - scaleRange[0]),
+      textureKey: variants ? variants[Math.floor(rng() * variants.length)] : undefined,
     });
   }
   return items;
@@ -274,19 +277,40 @@ const CURATED_DECORATIONS: DecorationConfig[] = [
   { id: "bench-south-1", kind: "bench", x: 2000, y: 2040 },
 ];
 
+const TREE_VARIANTS = AssetKeys.decorations.treeVariants;
+const BUSH_VARIANTS = AssetKeys.decorations.bushVariants;
+const FLOWER_VARIANTS = AssetKeys.decorations.flowerVariants;
+
 export const DECORATIONS: DecorationConfig[] = [
   ...CURATED_DECORATIONS,
-  ...scatter("flower", 24, { x: 1750, y: 1350, width: 500, height: 350 }, "flower-plaza"),
-  ...scatter("tree", 14, { x: 1350, y: 1250, width: 1300, height: 120 }, "tree-north-row"),
-  ...scatter("tree", 10, { x: 1200, y: 1780, width: 200, height: 500 }, "tree-west-belt"),
-  ...scatter("tree", 10, { x: 2600, y: 1780, width: 200, height: 500 }, "tree-east-belt"),
-  ...scatter("bush", 16, { x: 1400, y: 1750, width: 1200, height: 400 }, "bush-mid"),
+  ...scatter("flower", 24, { x: 1750, y: 1350, width: 500, height: 350 }, "flower-plaza", {
+    variants: FLOWER_VARIANTS,
+  }),
+  ...scatter("tree", 14, { x: 1350, y: 1250, width: 1300, height: 120 }, "tree-north-row", {
+    variants: TREE_VARIANTS,
+  }),
+  ...scatter("tree", 10, { x: 1200, y: 1780, width: 200, height: 500 }, "tree-west-belt", {
+    variants: TREE_VARIANTS,
+  }),
+  ...scatter("tree", 10, { x: 2600, y: 1780, width: 200, height: 500 }, "tree-east-belt", {
+    variants: TREE_VARIANTS,
+  }),
+  ...scatter("bush", 16, { x: 1400, y: 1750, width: 1200, height: 400 }, "bush-mid", {
+    variants: BUSH_VARIANTS,
+  }),
   ...scatter("rock", 10, { x: 1000, y: 700, width: 2000, height: 1600 }, "rock-field"),
-  ...scatter("pine", 60, { x: 3000, y: 2300, width: 950, height: 650 }, "pine-forest"),
-  ...scatter("bush", 20, { x: 3000, y: 2300, width: 950, height: 650 }, "bush-forest"),
+  // No dedicated conifer art yet, so the dense forest reuses the same tree pool.
+  ...scatter("pine", 60, { x: 3000, y: 2300, width: 950, height: 650 }, "pine-forest", {
+    variants: TREE_VARIANTS,
+  }),
+  ...scatter("bush", 20, { x: 3000, y: 2300, width: 950, height: 650 }, "bush-forest", {
+    variants: BUSH_VARIANTS,
+  }),
   ...scatter("rock", 26, { x: 3150, y: 60, width: 800, height: 600 }, "rock-mountains"),
   ...scatter("rock", 18, { x: 40, y: 40, width: 850, height: 600 }, "rock-glacier"),
-  ...scatter("flower", 14, { x: 200, y: 2100, width: 700, height: 150 }, "flower-beach"),
+  ...scatter("flower", 14, { x: 200, y: 2100, width: 700, height: 150 }, "flower-beach", {
+    variants: FLOWER_VARIANTS,
+  }),
 ];
 
 export const NPCS: NpcConfig[] = [

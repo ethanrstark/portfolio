@@ -6,9 +6,11 @@
 export const GAME_WIDTH = 1024;
 export const GAME_HEIGHT = 640;
 
-export const TILE_SIZE = 32;
-
 export const PLAYER_SPEED = 200;
+
+// The current placeholder character art is drawn small (~28-31px); scale it
+// up so Stitch reads clearly next to buildings/trees at world scale.
+export const PLAYER_SCALE = 1.8;
 
 export const INTERACTION_RADIUS = 90;
 

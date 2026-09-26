@@ -1,22 +1,24 @@
 /**
- * Centralized texture/asset keys. Phase 1 generates all of these as
- * placeholder textures at runtime (see PlaceholderTextures.ts) instead of
- * loading image files. To swap in real art later: drop files under
- * src/assets/... matching these names, load them in BootScene with
- * `this.load.image(key, path)` / `this.load.spritesheet(...)`, and delete
- * the matching generator call — no other code needs to change because
- * every consumer only ever references these keys.
+ * Centralized texture/asset keys. Every consumer (Player, Building,
+ * DecorationPlacer, ...) only ever references these constants, never a raw
+ * file path — so which pieces are real art vs. procedurally generated
+ * placeholders (see PlaceholderTextures.ts / AssetManifest.ts) never leaks
+ * into game logic.
  */
 export const AssetKeys = {
   stitch: {
-    down: "stitch-down",
-    downStep: "stitch-down-step",
-    up: "stitch-up",
-    upStep: "stitch-up-step",
-    left: "stitch-left",
-    leftStep: "stitch-left-step",
-    right: "stitch-right",
-    rightStep: "stitch-right-step",
+    idle: {
+      down: ["stitch-idle-down-0", "stitch-idle-down-1", "stitch-idle-down-2", "stitch-idle-down-3"],
+      up: ["stitch-idle-up-0", "stitch-idle-up-1", "stitch-idle-up-2", "stitch-idle-up-3"],
+      left: ["stitch-idle-left-0", "stitch-idle-left-1", "stitch-idle-left-2", "stitch-idle-left-3"],
+      right: ["stitch-idle-right-0", "stitch-idle-right-1", "stitch-idle-right-2", "stitch-idle-right-3"],
+    },
+    run: {
+      down: Array.from({ length: 6 }, (_, i) => `stitch-run-down-${i}`),
+      up: Array.from({ length: 6 }, (_, i) => `stitch-run-up-${i}`),
+      left: Array.from({ length: 6 }, (_, i) => `stitch-run-left-${i}`),
+      right: Array.from({ length: 6 }, (_, i) => `stitch-run-right-${i}`),
+    },
   },
   terrain: {
     grass: "terrain-grass",
@@ -27,19 +29,26 @@ export const AssetKeys = {
     stone: "terrain-stone",
   },
   buildings: {
-    about: "building-about",
-    projects: "building-projects",
-    education: "building-education",
-    experience: "building-experience",
-    skills: "building-skills",
-    links: "building-links",
-    creative: "building-creative",
+    variant1: "building-1",
+    variant2: "building-2",
   },
   decorations: {
-    tree: "deco-tree",
-    pine: "deco-pine",
-    bush: "deco-bush",
-    flower: "deco-flower",
+    // Real tree/bush art comes in several species/sizes; DecorationPlacer
+    // picks one per-instance from these pools (baked into world data at
+    // generation time so placement stays deterministic).
+    treeVariants: [
+      "tree-oak-lg",
+      "tree-oak-md",
+      "tree-oak-sm",
+      "tree-birch-lg",
+      "tree-birch-md",
+      "tree-birch-sm",
+      "tree-apple-lg",
+      "tree-apple-md",
+      "tree-apple-sm",
+    ],
+    bushVariants: ["bush-reg-sm", "bush-reg-md", "bush-reg-lg"],
+    flowerVariants: ["flowerbush-1", "flowerbush-2", "flowerbush-3", "flowerbush-4"],
     rock: "deco-rock",
     bench: "deco-bench",
     lamp: "deco-lamp",
@@ -51,6 +60,6 @@ export const AssetKeys = {
     base: "npc-base",
   },
   ui: {
-    sparkle: "ui-sparkle",
+    sparkle: Array.from({ length: 6 }, (_, i) => `ui-sparkle-${i}`),
   },
 } as const;

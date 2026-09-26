@@ -34,11 +34,14 @@ export class Building implements Interactable {
     this.prompt = config.name;
     this.sectionId = config.sectionId;
 
-    const textureKey =
-      AssetKeys.buildings[config.theme as keyof typeof AssetKeys.buildings] ?? config.theme;
+    const textureKey = AssetKeys.buildings[config.spriteKey];
 
     this.sprite = scene.add.image(config.x, config.y, textureKey);
     this.sprite.setOrigin(0.5, 1);
+    // Real building art is a fixed native resolution; stretch it to the
+    // building's configured footprint so the large/medium/small size
+    // hierarchy from worldConfig is preserved regardless of source art size.
+    this.sprite.setDisplaySize(config.width, config.height);
     this.sprite.setDepth(DEPTH.WORLD + config.y + config.height / 2);
 
     // Collision body sized to roughly the wall footprint (not the roof peak).
@@ -82,27 +85,21 @@ export class Building implements Interactable {
     this.sprite.setAlpha(1);
   }
 
-  /** A single floating sparkle that fades out — re-spawned on a delay while in range. */
+  /** A looping twinkle sprite, re-spawned on a delay while in range. */
   private spawnSparkle(): void {
     if (!this.glowTween) return; // range was exited before this fired
+    if (!this.scene.anims.exists("ui-sparkle-twinkle")) return;
+
     const offsetX = Phaser.Math.Between(-30, 30);
     const sparkle = this.scene.add
-      .image(this.x + offsetX, this.y - this.sprite.displayHeight - 10, AssetKeys.ui.sparkle)
+      .sprite(this.x + offsetX, this.y - this.sprite.displayHeight - 10, AssetKeys.ui.sparkle[0])
       .setDepth(DEPTH.WORLD + this.y + 9999)
-      .setAlpha(0)
-      .setScale(0.6);
+      .setScale(1.6);
 
-    this.scene.tweens.add({
-      targets: sparkle,
-      alpha: { from: 0, to: 1 },
-      y: sparkle.y - 18,
-      scale: 1,
-      duration: 700,
-      yoyo: true,
-      onComplete: () => {
-        sparkle.destroy();
-        this.scene.time.delayedCall(500, () => this.spawnSparkle());
-      },
+    sparkle.play("ui-sparkle-twinkle");
+    sparkle.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      sparkle.destroy();
+      this.scene.time.delayedCall(500, () => this.spawnSparkle());
     });
   }
 }

@@ -5,19 +5,23 @@ import { DECORATIONS, NPCS } from "./worldConfig";
 import type { DecorationKind } from "./types";
 import { spawnNpc } from "@/game/entities/NPC";
 
+/**
+ * Default texture per decoration kind. tree/pine/bush/flower are always
+ * given an explicit per-instance DecorationConfig.textureKey (a random
+ * species/size chosen once at world-generation time — see worldConfig.ts),
+ * so these are just a defensive fallback.
+ */
 const DECORATION_TEXTURE: Record<DecorationKind, string> = {
-  tree: AssetKeys.decorations.tree,
-  pine: AssetKeys.decorations.pine,
-  bush: AssetKeys.decorations.bush,
-  flower: AssetKeys.decorations.flower,
+  tree: AssetKeys.decorations.treeVariants[0],
+  pine: AssetKeys.decorations.treeVariants[0],
+  bush: AssetKeys.decorations.bushVariants[0],
+  flower: AssetKeys.decorations.flowerVariants[0],
   rock: AssetKeys.decorations.rock,
   bench: AssetKeys.decorations.bench,
   lamp: AssetKeys.decorations.lamp,
   sign: AssetKeys.decorations.sign,
   fountain: AssetKeys.decorations.fountain,
 };
-
-const FLOWER_TINTS = [0xff6b8a, 0xffd166, 0xa78bfa, 0xff9f6b, 0xf27ab0];
 
 /** Decorations whose base collides with the player (trunks, benches, lamps, fountain). */
 const SOLID_KINDS: DecorationKind[] = ["tree", "pine", "rock", "bench", "lamp", "fountain"];
@@ -27,18 +31,13 @@ export function placeDecorations(
   obstacles: Phaser.Physics.Arcade.StaticGroup,
 ): void {
   for (const deco of DECORATIONS) {
-    const texture = DECORATION_TEXTURE[deco.kind];
+    const texture = deco.textureKey ?? DECORATION_TEXTURE[deco.kind];
     const sprite = scene.add.image(deco.x, deco.y, texture);
     // The fountain is radially symmetric (no "trunk base"), so anchor it at
     // its center instead of the bottom-anchored origin every other prop uses.
     sprite.setOrigin(0.5, deco.kind === "fountain" ? 0.5 : 0.92);
     if (deco.scale) sprite.setScale(deco.scale);
     sprite.setDepth(DEPTH.WORLD + deco.y);
-
-    if (deco.kind === "flower") {
-      const tint = FLOWER_TINTS[Math.floor(Math.abs(Math.sin(deco.x * 12.9898 + deco.y * 78.233)) * FLOWER_TINTS.length) % FLOWER_TINTS.length];
-      sprite.setTint(tint);
-    }
 
     if (deco.kind === "sign" && deco.label) {
       scene.add

@@ -11,8 +11,8 @@ export interface BuildingConfig {
   width: number;
   height: number;
   tier: BuildingTier;
-  /** Texture key theme, used to pick roof/wall colors — see PlaceholderTextures. */
-  theme: string;
+  /** Which shared building sprite to use (AssetKeys.buildings.*) — reused across slots. */
+  spriteKey: "variant1" | "variant2";
 }
 
 export type RegionKind = "glacier" | "mountains" | "beach" | "forest";
@@ -72,6 +72,12 @@ export interface DecorationConfig {
   scale?: number;
   /** Sign decorations can carry a short label. */
   label?: string;
+  /**
+   * Explicit texture key, chosen at generation time (e.g. a random species/
+   * size for tree|pine|bush|flower). Falls back to the kind's single default
+   * texture in DecorationPlacer when omitted.
+   */
+  textureKey?: string;
 }
 
 export interface NpcConfig {
