@@ -280,6 +280,8 @@ const CURATED_DECORATIONS: DecorationConfig[] = [
 const TREE_VARIANTS = AssetKeys.decorations.treeVariants;
 const BUSH_VARIANTS = AssetKeys.decorations.bushVariants;
 const FLOWER_VARIANTS = AssetKeys.decorations.flowerVariants;
+const [TUFT_OLIVE, TUFT_GREEN, TUFT_TEAL, TUFT_DARK_GREEN, TUFT_YELLOW_GREEN] =
+  AssetKeys.decorations.grassTuftVariants;
 
 export const DECORATIONS: DecorationConfig[] = [
   ...CURATED_DECORATIONS,
@@ -299,12 +301,32 @@ export const DECORATIONS: DecorationConfig[] = [
     variants: BUSH_VARIANTS,
   }),
   ...scatter("rock", 10, { x: 1000, y: 700, width: 2000, height: 1600 }, "rock-field"),
+  // Grass-tuft texture accents (organic clumps, not a tileable fill — see
+  // AssetManifest.ts) — a warm mix through the village core, a cooler/drier
+  // mix near the mountain and beach transitions, and a dark mix in the
+  // forest where the canopy tint already darkens the ground.
+  ...scatter("grassTuft", 90, { x: 1150, y: 1150, width: 1700, height: 1300 }, "tuft-village", {
+    variants: [TUFT_GREEN, TUFT_YELLOW_GREEN],
+    scaleRange: [0.7, 1.05],
+  }),
+  ...scatter("grassTuft", 26, { x: 1000, y: 700, width: 2100, height: 350 }, "tuft-foothills", {
+    variants: [TUFT_OLIVE],
+    scaleRange: [0.7, 1.0],
+  }),
+  ...scatter("grassTuft", 18, { x: 950, y: 1950, width: 350, height: 300 }, "tuft-shore", {
+    variants: [TUFT_TEAL],
+    scaleRange: [0.7, 1.0],
+  }),
   // No dedicated conifer art yet, so the dense forest reuses the same tree pool.
   ...scatter("pine", 60, { x: 3000, y: 2300, width: 950, height: 650 }, "pine-forest", {
     variants: TREE_VARIANTS,
   }),
   ...scatter("bush", 20, { x: 3000, y: 2300, width: 950, height: 650 }, "bush-forest", {
     variants: BUSH_VARIANTS,
+  }),
+  ...scatter("grassTuft", 40, { x: 2950, y: 2250, width: 1050, height: 750 }, "tuft-forest", {
+    variants: [TUFT_DARK_GREEN],
+    scaleRange: [0.8, 1.15],
   }),
   ...scatter("rock", 26, { x: 3150, y: 60, width: 800, height: 600 }, "rock-mountains"),
   ...scatter("rock", 18, { x: 40, y: 40, width: 850, height: 600 }, "rock-glacier"),

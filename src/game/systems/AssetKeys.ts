@@ -49,6 +49,8 @@ export const AssetKeys = {
     ],
     bushVariants: ["bush-reg-sm", "bush-reg-md", "bush-reg-lg"],
     flowerVariants: ["flowerbush-1", "flowerbush-2", "flowerbush-3", "flowerbush-4"],
+    // Same grass-tuft clump in 5 palettes, cropped from Ground_grass.png.
+    grassTuftVariants: ["grass-tuft-0", "grass-tuft-1", "grass-tuft-2", "grass-tuft-3", "grass-tuft-4"],
     rock: "deco-rock",
     bench: "deco-bench",
     lamp: "deco-lamp",

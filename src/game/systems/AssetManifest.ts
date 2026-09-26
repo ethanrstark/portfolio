@@ -45,6 +45,20 @@ const sparkles = import.meta.glob("/src/assets/ui/*.png", {
   import: "default",
 }) as Record<string, string>;
 
+// Cropped from the real terrain sheets (Ground_grass.png / Road5.png) rather
+// than loaded whole — see AssetManifest's terrain section below for why.
+const terrainExtracted = import.meta.glob("/src/assets/environment/terrain/extracted/*.png", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
+const grassTufts = import.meta.glob("/src/assets/environment/decorations/grass-tufts/*.png", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
 /** Finds the one glob entry whose path ends with `filename`. */
 function pick(map: Record<string, string>, filename: string): string | undefined {
   const path = Object.keys(map).find((p) => p.endsWith(`/${filename}`));
@@ -115,6 +129,21 @@ export function collectRealAssets(): ImageAsset[] {
   // UI sparkle animation frames.
   AssetKeys.ui.sparkle.forEach((key, i) => {
     add(key, pick(sparkles, `sparkle_000${i + 1}.png`));
+  });
+
+  // Path tile: the Road1-5 sheets are grid-based blob/autotile sets meant
+  // for tile-grid level design, which doesn't map onto this game's curved,
+  // waypoint-based paths (see TerrainRenderer.ts). Rather than skip the art
+  // entirely, a small seamless swatch was cropped from the interior of
+  // Road5's "full" tile (warm cobblestone) and committed as its own file.
+  add(AssetKeys.terrain.path, pick(terrainExtracted, "path-cobblestone.png"));
+
+  // Grass tuft clumps (5 palettes cropped from Ground_grass.png) scattered
+  // as decoration on top of the flat grass base — the source shapes are
+  // organic clumps, not seamless tiles, so they work as texture accents
+  // rather than a ground fill.
+  AssetKeys.decorations.grassTuftVariants.forEach((key, i) => {
+    add(key, pick(grassTufts, `tuft-${i}.png`));
   });
 
   return assets;

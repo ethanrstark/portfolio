@@ -16,6 +16,7 @@ const DECORATION_TEXTURE: Record<DecorationKind, string> = {
   pine: AssetKeys.decorations.treeVariants[0],
   bush: AssetKeys.decorations.bushVariants[0],
   flower: AssetKeys.decorations.flowerVariants[0],
+  grassTuft: AssetKeys.decorations.grassTuftVariants[0],
   rock: AssetKeys.decorations.rock,
   bench: AssetKeys.decorations.bench,
   lamp: AssetKeys.decorations.lamp,
@@ -37,7 +38,9 @@ export function placeDecorations(
     // its center instead of the bottom-anchored origin every other prop uses.
     sprite.setOrigin(0.5, deco.kind === "fountain" ? 0.5 : 0.92);
     if (deco.scale) sprite.setScale(deco.scale);
-    sprite.setDepth(DEPTH.WORLD + deco.y);
+    // Grass tufts are flat ground texture, not objects — keep them below the
+    // Y-sorted WORLD band so the player always walks over them, never behind.
+    sprite.setDepth(deco.kind === "grassTuft" ? DEPTH.GROUND_DECOR : DEPTH.WORLD + deco.y);
 
     if (deco.kind === "sign" && deco.label) {
       scene.add

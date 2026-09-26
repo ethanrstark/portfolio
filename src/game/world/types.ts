@@ -57,6 +57,7 @@ export type DecorationKind =
   | "pine"
   | "bush"
   | "flower"
+  | "grassTuft"
   | "rock"
   | "bench"
   | "lamp"
