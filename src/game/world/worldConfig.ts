@@ -1,5 +1,5 @@
-import { createRng } from "./rng";
 import { AssetKeys } from "@/game/systems/AssetKeys";
+import { createDecorationScatter } from "./decorationPlacement";
 import type {
   BuildingConfig,
   RegionConfig,
@@ -7,7 +7,6 @@ import type {
   WaterBody,
   BridgeConfig,
   DecorationConfig,
-  DecorationKind,
   NpcConfig,
 } from "./types";
 
@@ -238,29 +237,6 @@ export const PATHS: PathConfig[] = [
   },
 ];
 
-const rng = createRng(1337);
-function scatter(
-  kind: DecorationKind,
-  count: number,
-  bounds: { x: number; y: number; width: number; height: number },
-  idPrefix: string,
-  options: { scaleRange?: [number, number]; variants?: readonly string[] } = {},
-): DecorationConfig[] {
-  const { scaleRange = [0.85, 1.15], variants } = options;
-  const items: DecorationConfig[] = [];
-  for (let i = 0; i < count; i++) {
-    items.push({
-      id: `${idPrefix}-${i}`,
-      kind,
-      x: bounds.x + rng() * bounds.width,
-      y: bounds.y + rng() * bounds.height,
-      scale: scaleRange[0] + rng() * (scaleRange[1] - scaleRange[0]),
-      textureKey: variants ? variants[Math.floor(rng() * variants.length)] : undefined,
-    });
-  }
-  return items;
-}
-
 /** Hand-placed decorations around the spawn plaza and main paths (intentional, not scattered). */
 const CURATED_DECORATIONS: DecorationConfig[] = [
   { id: "fountain-spawn", kind: "fountain", x: 2000, y: 1500 },
@@ -276,6 +252,17 @@ const CURATED_DECORATIONS: DecorationConfig[] = [
   { id: "lamp-south-2", kind: "lamp", x: 2040, y: 2000 },
   { id: "bench-south-1", kind: "bench", x: 2000, y: 2040 },
 ];
+
+// scatter() rejects any candidate that lands on a path, inside a building's
+// footprint, in the water, in an opaque region overlay, or too close to an
+// already-placed prop — see decorationPlacement.ts. Seeding it with the
+// curated points above means the scatter passes below steer clear of the
+// fountain/benches/lamps/signs too, not just each other.
+const { scatter, seed: seedDecorationScatter } = createDecorationScatter(
+  { buildings: BUILDINGS, paths: PATHS, bridges: BRIDGES, water: WATER_BODIES, regions: REGIONS },
+  1337,
+);
+seedDecorationScatter(CURATED_DECORATIONS);
 
 const TREE_VARIANTS = AssetKeys.decorations.treeVariants;
 const BUSH_VARIANTS = AssetKeys.decorations.bushVariants;

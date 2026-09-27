@@ -10,6 +10,7 @@ import { PointerControls } from "@/game/input/PointerControls";
 import { InteractionSystem } from "@/game/systems/InteractionSystem";
 import { AudioManager } from "@/game/audio/AudioManager";
 import { eventBus } from "@/game/systems/eventBus";
+import { DebugOverlay } from "@/game/world/DebugOverlay";
 
 const PLAYER_MOVED_EMIT_INTERVAL = 100; // ms — throttle minimap sync updates
 
@@ -41,6 +42,7 @@ export class WorldScene extends Phaser.Scene {
     this.keyboard = new KeyboardControls(this);
     this.pointer = new PointerControls(this);
     new AudioManager(this);
+    new DebugOverlay(this);
 
     eventBus.on("ui:panelState", (open) => {
       this.inputEnabled = !open;

@@ -44,9 +44,12 @@ export class Building implements Interactable {
     this.sprite.setDisplaySize(config.width, config.height);
     this.sprite.setDepth(DEPTH.WORLD + config.y + config.height / 2);
 
-    // Collision body sized to roughly the wall footprint (not the roof peak).
-    const footprintHeight = config.height * 0.65;
-    const zone = scene.add.zone(config.x, config.y - footprintHeight / 2, config.width * 0.92, footprintHeight);
+    // Collision body sized to the real art's wall footprint, not the roof —
+    // measured against both building sprites (steep Tudor-style roofs eat
+    // into a naive "bottom N%" guess more than the old placeholder art did).
+    const footprintHeight = config.height * 0.36;
+    const footprintWidth = config.width * 0.72;
+    const zone = scene.add.zone(config.x, config.y - footprintHeight / 2, footprintWidth, footprintHeight);
     obstacles.add(zone);
 
     scene.add
