@@ -1,12 +1,11 @@
 import Phaser from "phaser";
-import { generatePlaceholderTextures } from "@/game/systems/PlaceholderTextures";
 import { preloadRealAssets, createSparkleAnimation } from "@/game/systems/AssetManifest";
 import { createStitchAnimations } from "@/game/entities/Player";
+import { createTileAnimations, preloadTiledAssets, registerTiledMap } from "@/game/systems/TiledAssets";
 
 /**
- * Loads real art (whatever exists under src/assets/...), generates
- * placeholder textures for anything that doesn't have real art yet, builds
- * every animation, then hands off to WorldScene.
+ * Loads Stitch/UI art and the Tiled map's tilesets, registers the map and
+ * builds every animation, then hands off to WorldScene.
  */
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -15,10 +14,12 @@ export class BootScene extends Phaser.Scene {
 
   preload(): void {
     preloadRealAssets(this);
+    preloadTiledAssets(this);
   }
 
   create(): void {
-    generatePlaceholderTextures(this);
+    registerTiledMap(this);
+    createTileAnimations(this);
     createStitchAnimations(this);
     createSparkleAnimation(this);
     this.scene.start("World");

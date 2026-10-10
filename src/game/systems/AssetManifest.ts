@@ -21,39 +21,7 @@ const stitchPlaceholder = import.meta.glob("/src/assets/characters/stitch/placeh
   import: "default",
 }) as Record<string, string>;
 
-const buildings = import.meta.glob("/src/assets/environment/buildings/*.png", {
-  eager: true,
-  query: "?url",
-  import: "default",
-}) as Record<string, string>;
-
-const trees = import.meta.glob("/src/assets/environment/trees/{large,medium,small}/*.png", {
-  eager: true,
-  query: "?url",
-  import: "default",
-}) as Record<string, string>;
-
-const bushes = import.meta.glob("/src/assets/environment/bushes/*.png", {
-  eager: true,
-  query: "?url",
-  import: "default",
-}) as Record<string, string>;
-
 const sparkles = import.meta.glob("/src/assets/ui/*.png", {
-  eager: true,
-  query: "?url",
-  import: "default",
-}) as Record<string, string>;
-
-// Cropped from the real terrain sheets (Ground_grass.png / Road5.png) rather
-// than loaded whole — see AssetManifest's terrain section below for why.
-const terrainExtracted = import.meta.glob("/src/assets/environment/terrain/extracted/*.png", {
-  eager: true,
-  query: "?url",
-  import: "default",
-}) as Record<string, string>;
-
-const grassTufts = import.meta.glob("/src/assets/environment/decorations/grass-tufts/*.png", {
   eager: true,
   query: "?url",
   import: "default",
@@ -72,9 +40,8 @@ export interface ImageAsset {
 
 /**
  * Builds the full list of real (key, url) pairs to preload. Any entry whose
- * source file is missing is silently skipped — PlaceholderTextures then
- * fills that specific key with a generated placeholder, so a partially
- * finished art drop never breaks the boot sequence.
+ * source file is missing is silently skipped, so a partially finished art
+ * drop never breaks the boot sequence.
  */
 export function collectRealAssets(): ImageAsset[] {
   const assets: ImageAsset[] = [];
@@ -104,46 +71,9 @@ export function collectRealAssets(): ImageAsset[] {
     });
   }
 
-  // Buildings (two hand-drawn variants, reused across every building slot).
-  add(AssetKeys.buildings.variant1, pick(buildings, "building_1.png"));
-  add(AssetKeys.buildings.variant2, pick(buildings, "building_2.png"));
-
-  // Trees: one static frame per species/size (the source art also has a
-  // 13-frame sway cycle per variant, saved for a Phase 4 animation pass).
-  for (const key of AssetKeys.decorations.treeVariants) {
-    const [, species, size] = key.split("-"); // "tree-oak-lg" -> ["tree","oak","lg"]
-    add(key, pick(trees, `${species}_tree_${size}_0001.png`));
-  }
-
-  // Bushes (regular bush, all three sizes).
-  for (const key of AssetKeys.decorations.bushVariants) {
-    const size = key.split("-")[2]; // "bush-reg-md" -> "md"
-    add(key, pick(bushes, `reg_bush_${size}.png`));
-  }
-
-  // Flower bushes double as the "flower" decoration's real art.
-  AssetKeys.decorations.flowerVariants.forEach((key, i) => {
-    add(key, pick(bushes, `flower_bush_${i + 1}_sm.png`));
-  });
-
   // UI sparkle animation frames.
   AssetKeys.ui.sparkle.forEach((key, i) => {
     add(key, pick(sparkles, `sparkle_000${i + 1}.png`));
-  });
-
-  // Path tile: the Road1-5 sheets are grid-based blob/autotile sets meant
-  // for tile-grid level design, which doesn't map onto this game's curved,
-  // waypoint-based paths (see TerrainRenderer.ts). Rather than skip the art
-  // entirely, a small seamless swatch was cropped from the interior of
-  // Road5's "full" tile (warm cobblestone) and committed as its own file.
-  add(AssetKeys.terrain.path, pick(terrainExtracted, "path-cobblestone.png"));
-
-  // Grass tuft clumps (5 palettes cropped from Ground_grass.png) scattered
-  // as decoration on top of the flat grass base — the source shapes are
-  // organic clumps, not seamless tiles, so they work as texture accents
-  // rather than a ground fill.
-  AssetKeys.decorations.grassTuftVariants.forEach((key, i) => {
-    add(key, pick(grassTufts, `tuft-${i}.png`));
   });
 
   return assets;

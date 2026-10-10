@@ -8,11 +8,9 @@ export const GAME_HEIGHT = 640;
 
 export const PLAYER_SPEED = 200;
 
-// The current placeholder character art is drawn small (~28-31px); scale it
-// up so Stitch reads clearly next to buildings/trees at world scale.
-export const PLAYER_SCALE = 1.8;
-
-export const INTERACTION_RADIUS = 90;
+// The placeholder character art is ~28-31px; against the map's 32px tiles
+// and 32px-wide doors this keeps Stitch about one tile wide.
+export const PLAYER_SCALE = 1.2;
 
 /**
  * Depth (z-order) bands. Anything that needs to visually overlap the player

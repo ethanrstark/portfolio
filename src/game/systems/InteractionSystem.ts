@@ -1,21 +1,20 @@
 import Phaser from "phaser";
 import { eventBus } from "./eventBus";
 
-export type InteractionType = "building" | "npc" | "object";
+export type InteractionType = "door" | "npc" | "object";
 
 /**
  * Generic contract every interactable world object implements. The scene
- * never special-cases "the About building" vs "the Projects building" — it
- * only ever talks to this interface, so adding a new interactable building
- * is a data + activate() concern, not new engine logic.
+ * never special-cases "the About door" vs "the Experience door" — it only
+ * talks to this interface, so adding another interactable is a Tiled +
+ * activate() concern, not new engine logic.
  */
 export interface Interactable {
   id: string;
-  x: number;
-  y: number;
-  radius: number;
-  interactionType: InteractionType;
   prompt: string;
+  interactionType: InteractionType;
+  /** Distance from the player's body to this object when in range (0 = overlapping), otherwise null. */
+  rangeDistance(playerBounds: Phaser.Geom.Rectangle): number | null;
   activate(): void;
   onEnterRange?(): void;
   onExitRange?(): void;
@@ -35,14 +34,14 @@ export class InteractionSystem {
     if (!value) this.clearCurrent();
   }
 
-  update(playerX: number, playerY: number, spacePressed: boolean): void {
+  update(playerBounds: Phaser.Geom.Rectangle, spacePressed: boolean): void {
     if (!this.enabled) return;
 
     let nearest: Interactable | null = null;
     let nearestDist = Infinity;
     for (const item of this.interactables) {
-      const dist = Phaser.Math.Distance.Between(playerX, playerY, item.x, item.y);
-      if (dist <= item.radius && dist < nearestDist) {
+      const dist = item.rangeDistance(playerBounds);
+      if (dist !== null && dist < nearestDist) {
         nearest = item;
         nearestDist = dist;
       }

@@ -1,26 +1,34 @@
 import { eventBus } from "@/game/systems/eventBus";
-import { BUILDINGS, REGIONS, WORLD_WIDTH, WORLD_HEIGHT } from "@/game/world/worldConfig";
+import { DOOR_TRIGGERS, TILED_MAP, WORLD_WIDTH, WORLD_HEIGHT } from "@/game/world/tiledWorld";
+import { SECTIONS } from "@/portfolio/sections";
 import type { SectionId } from "@/portfolio/data/types";
 import { el } from "@/ui/utils";
 
 const MAP_WIDTH = 208;
-const MAP_HEIGHT = 156; // matches the world's 4:3 aspect ratio
+const MAP_HEIGHT = Math.round((MAP_WIDTH * WORLD_HEIGHT) / WORLD_WIDTH); // keep the world's aspect ratio
 
-const REGION_COLORS: Record<string, string> = {
-  glacier: "#dfeaf4",
-  mountains: "#9aa0ab",
-  beach: "#e9d6a3",
-  forest: "#3f7a4d",
+const TILE_LAYER_COLORS: Record<string, string> = {
+  Paths: "#c9a87c",
+  Water: "#4f9bcf",
 };
+
+/** One marker per door trigger, at the trigger's center. */
+const MARKERS = DOOR_TRIGGERS.map((door) => ({
+  sectionId: door.section,
+  name: SECTIONS[door.section].title,
+  x: door.rect.x + door.rect.width / 2,
+  y: door.rect.y + door.rect.height / 2,
+}));
 
 /**
  * A simplified navigation map, not a pixel-accurate game minimap: player
- * position, building markers, and region tints, scaled into a small canvas.
- * Clicking a building marker jumps straight to that portfolio section.
+ * position, door markers, and the map's paths and water, scaled into a small canvas.
+ * Clicking a door marker jumps straight to that portfolio section.
  */
 export class Minimap {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private background: HTMLCanvasElement;
   private scaleX = MAP_WIDTH / WORLD_WIDTH;
   private scaleY = MAP_HEIGHT / WORLD_HEIGHT;
   private playerPos = { x: WORLD_WIDTH / 2, y: WORLD_HEIGHT / 2 };
@@ -37,6 +45,7 @@ export class Minimap {
     root.append(wrapper);
 
     this.ctx = this.canvas.getContext("2d")!;
+    this.background = this.renderBackground();
 
     this.canvas.addEventListener("click", (e) => this.handleClick(e));
     this.canvas.addEventListener("mousemove", (e) => this.handleHover(e));
@@ -53,15 +62,15 @@ export class Minimap {
     const clickX = ((e.clientX - rect.left) / rect.width) * MAP_WIDTH;
     const clickY = ((e.clientY - rect.top) / rect.height) * MAP_HEIGHT;
 
-    let closest: (typeof BUILDINGS)[number] | null = null;
+    let closest: (typeof MARKERS)[number] | null = null;
     let closestDist = Infinity;
-    for (const building of BUILDINGS) {
-      const bx = building.x * this.scaleX;
-      const by = building.y * this.scaleY;
+    for (const marker of MARKERS) {
+      const bx = marker.x * this.scaleX;
+      const by = marker.y * this.scaleY;
       const dist = Math.hypot(bx - clickX, by - clickY);
       if (dist < closestDist) {
         closestDist = dist;
-        closest = building;
+        closest = marker;
       }
     }
 
@@ -75,13 +84,13 @@ export class Minimap {
     const hoverX = ((e.clientX - rect.left) / rect.width) * MAP_WIDTH;
     const hoverY = ((e.clientY - rect.top) / rect.height) * MAP_HEIGHT;
 
-    let nearest: (typeof BUILDINGS)[number] | null = null;
+    let nearest: (typeof MARKERS)[number] | null = null;
     let nearestDist = Infinity;
-    for (const building of BUILDINGS) {
-      const dist = Math.hypot(building.x * this.scaleX - hoverX, building.y * this.scaleY - hoverY);
+    for (const marker of MARKERS) {
+      const dist = Math.hypot(marker.x * this.scaleX - hoverX, marker.y * this.scaleY - hoverY);
       if (dist < nearestDist) {
         nearestDist = dist;
-        nearest = building;
+        nearest = marker;
       }
     }
 
@@ -89,26 +98,42 @@ export class Minimap {
     this.canvas.style.cursor = nearest && nearestDist <= 10 ? "pointer" : "default";
   }
 
-  private draw(): void {
-    const ctx = this.ctx;
-    ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+  /** The map's grass, paths and water never change, so they're painted once. */
+  private renderBackground(): HTMLCanvasElement {
+    const canvas = document.createElement("canvas");
+    canvas.width = MAP_WIDTH;
+    canvas.height = MAP_HEIGHT;
+    const ctx = canvas.getContext("2d")!;
 
     ctx.fillStyle = "#6fb04f";
     ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
 
-    for (const region of REGIONS) {
-      ctx.fillStyle = REGION_COLORS[region.kind] ?? "#6fb04f";
-      ctx.fillRect(
-        region.x * this.scaleX,
-        region.y * this.scaleY,
-        region.width * this.scaleX,
-        region.height * this.scaleY,
-      );
+    for (const layer of TILED_MAP.layers) {
+      const color = TILE_LAYER_COLORS[layer.name];
+      if (layer.type !== "tilelayer" || !color || !layer.data || !layer.width) continue;
+      ctx.fillStyle = color;
+      const cellW = TILED_MAP.tilewidth * this.scaleX;
+      const cellH = TILED_MAP.tileheight * this.scaleY;
+      layer.data.forEach((gid, index) => {
+        if (!gid) return;
+        const col = index % layer.width!;
+        const row = Math.floor(index / layer.width!);
+        // +0.5 overdraw hides hairline gaps between neighboring cells.
+        ctx.fillRect(col * cellW, row * cellH, cellW + 0.5, cellH + 0.5);
+      });
     }
 
-    for (const building of BUILDINGS) {
-      const x = building.x * this.scaleX;
-      const y = building.y * this.scaleY;
+    return canvas;
+  }
+
+  private draw(): void {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+    ctx.drawImage(this.background, 0, 0);
+
+    for (const marker of MARKERS) {
+      const x = marker.x * this.scaleX;
+      const y = marker.y * this.scaleY;
       ctx.fillStyle = "#3a2a18";
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, Math.PI * 2);

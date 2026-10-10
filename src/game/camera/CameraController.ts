@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { WORLD_WIDTH, WORLD_HEIGHT } from "@/game/world/worldConfig";
+import { WORLD_WIDTH, WORLD_HEIGHT } from "@/game/world/tiledWorld";
 
 /** Configures the main camera to follow the player within the world bounds. */
 export function setupCamera(scene: Phaser.Scene, target: Phaser.GameObjects.GameObject): void {

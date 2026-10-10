@@ -7,8 +7,7 @@ export type FacingDirection = "up" | "down" | "left" | "right";
 
 /**
  * Registers the idle/walk animations from whichever frames actually loaded
- * (real placeholder character art, or generated fallback frames — see
- * AssetManifest.ts / PlaceholderTextures.ts). Frame keys are looked up at
+ * (the placeholder character art — see AssetManifest.ts). Frame keys are looked up at
  * animation-creation time so this never needs to change when Stitch's real
  * sprite replaces the current stand-in, as long as the frame counts match
  * AssetKeys.stitch.
