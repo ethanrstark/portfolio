@@ -54,9 +54,10 @@ function buildSprites(scene: Phaser.Scene): Map<number, { sprite: Phaser.GameObj
     if (sprite.width !== s.width || sprite.height !== s.height) sprite.setDisplaySize(s.width, s.height);
 
     // Ground-level layers sit under the player; everything else is sorted by
-    // its bottom edge so Stitch walks behind roofs and in front of walls.
-    // `order` only breaks ties between sprites sharing a bottom edge.
-    sprite.setDepth(s.groundLevel ? DEPTH.GROUND_DECOR + s.order * 0.01 : DEPTH.WORLD + s.bottom + s.order * 0.001);
+    // its object's front edge (see TileSprite.sortBottom) against Stitch's
+    // feet, so he walks behind a whole house and in front of it as one unit.
+    // `order` only breaks ties between sprites sharing a sort edge.
+    sprite.setDepth(s.groundLevel ? DEPTH.GROUND_DECOR + s.order * 0.01 : DEPTH.WORLD + s.sortBottom + s.order * 0.001);
 
     const animationKey = tileAnimationKey(s.tilesetName, s.frame);
     const animated = scene.anims.exists(animationKey);

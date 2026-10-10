@@ -76,7 +76,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.play(`stitch-idle-${this.facing}`, true);
     }
 
-    this.setDepth(DEPTH.WORLD + this.y);
+  }
+
+  /**
+   * Sorted by his feet (the bottom of his collision body), the same ground
+   * contact point the world's sprites sort on, so he passes behind or in
+   * front of buildings exactly where his feet cross their front edge.
+   */
+  preUpdate(time: number, delta: number): void {
+    super.preUpdate(time, delta);
+    this.setDepth(DEPTH.WORLD + (this.body as Phaser.Physics.Arcade.Body).bottom);
   }
 
   private resolveFacing(direction: DirectionVector): FacingDirection {

@@ -11,8 +11,11 @@ import { SECTIONS } from "@/portfolio/sections";
  *  - Top-level tile layers "Grass", "Paths", "Water" -> the ground.
  *  - Object layers under the "Collisions" group -> blocking rectangles.
  *    (Tiles whose tileset entry has collision shapes also block; e.g. shore.)
- *  - Everything under the "Buildings" group is drawn as sprites sorted by y,
- *    except layers named like "Ground"/"Shadow", which sit under the player.
+ *  - Everything under the "Buildings" group is drawn as sprites sorted by y.
+ *    Layers named like "Ground"/"Shadow" sit under the player at all times;
+ *    layers named like "Fence" sort tile by tile; everything else (house,
+ *    door, chimney, tent, signs...) is grouped into whole objects — see
+ *    `sortBottom` below.
  *  - "Triggers/Starting Point": a point/rect marking the spawn.
  *  - "Triggers/Doors": rectangles with `section` (a SectionId) and
  *    `door_tile` (object id of the door sprite to animate) properties.
@@ -270,9 +273,43 @@ export interface TileSprite {
   order: number;
   /** Sits under the player at all times instead of being sorted by y. */
   groundLevel: boolean;
+  /**
+   * The y the player is compared against to decide who draws in front: the
+   * object's front edge on the ground. For a house this is the bottom of its
+   * whole footprint, not of each tile — otherwise a roof tile whose own
+   * bottom is above the player would wrongly draw behind him while he's
+   * standing behind the house.
+   */
+  sortBottom: number;
 }
 
 const GROUND_LAYER_PATTERN = /ground|shadow/i;
+/** Thin pieces (fences) that read correctly when each tile sorts on its own. */
+const PER_TILE_LAYER_PATTERN = /fence/i;
+
+/** Groups sprites that touch into whole objects; each gets the lowest bottom edge among its members. */
+function assignObjectSortBottoms(sprites: TileSprite[]): void {
+  const parent = sprites.map((_, i) => i);
+  const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+
+  const touches = (a: TileSprite, b: TileSprite) =>
+    a.x <= b.x + b.width && b.x <= a.x + a.width && a.bottom - a.height <= b.bottom && b.bottom - b.height <= a.bottom;
+
+  for (let i = 0; i < sprites.length; i++) {
+    for (let j = i + 1; j < sprites.length; j++) {
+      if (touches(sprites[i], sprites[j])) parent[find(i)] = find(j);
+    }
+  }
+
+  const bottomByRoot = new Map<number, number>();
+  sprites.forEach((s, i) => {
+    const root = find(i);
+    bottomByRoot.set(root, Math.max(bottomByRoot.get(root) ?? -Infinity, s.bottom));
+  });
+  sprites.forEach((s, i) => {
+    s.sortBottom = bottomByRoot.get(find(i))!;
+  });
+}
 
 function buildSprites(): TileSprite[] {
   const sprites: TileSprite[] = [];
@@ -301,6 +338,7 @@ function buildSprites(): TileSprite[] {
           layerPath: path,
           order,
           groundLevel,
+          sortBottom: obj.y,
         });
       }
     } else if (layer.type === "tilelayer" && layer.data && layer.width) {
@@ -319,10 +357,21 @@ function buildSprites(): TileSprite[] {
           layerPath: path,
           order,
           groundLevel,
+          sortBottom: (Math.floor(index / layer.width!) + 1) * TILED_MAP.tileheight,
         });
       });
     }
   }
+
+  // Whole-object sorting, per building group (so a fence or sign belonging
+  // to one building never merges with another building's objects).
+  const objectSprites = sprites.filter((s) => !s.groundLevel && !PER_TILE_LAYER_PATTERN.test(s.layerPath.split("/").pop()!));
+  const byGroup = new Map<string, TileSprite[]>();
+  for (const s of objectSprites) {
+    const group = s.layerPath.split("/")[1];
+    byGroup.set(group, [...(byGroup.get(group) ?? []), s]);
+  }
+  for (const group of byGroup.values()) assignObjectSortBottoms(group);
 
   return sprites;
 }
