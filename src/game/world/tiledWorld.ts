@@ -17,14 +17,19 @@ import { SECTIONS } from "@/portfolio/sections";
  *    door, chimney, tent, signs...) is grouped into whole objects — see
  *    `sortBottom` below.
  *  - "Triggers/Starting Point": a point/rect marking the spawn.
+ *  - Top-level object layers of tile objects (e.g. "Street", "Water
+ *    Animation") are ground decoration, drawn in file order between/above
+ *    the ground tile layers.
  *  - "Triggers/Doors": rectangles with `section` (a SectionId) and
- *    `door_tile` (object id of the door sprite to animate) properties.
+ *    `door_tile` (a list of object ids — every door sprite to animate; a
+ *    single int also works) properties.
  */
 
 export interface TiledProperty {
   name: string;
   type: string;
-  value: string | number | boolean;
+  /** A list property (e.g. several door tile ids) is an array of typed entries. */
+  value: string | number | boolean | { type: string; value: string | number | boolean }[];
 }
 
 export interface TiledObject {
@@ -131,8 +136,15 @@ export function tileMeta(tileset: TiledTileset, localId: number): TiledTileMeta 
   return tileset.tiles?.find((t) => t.id === localId);
 }
 
-function prop(obj: TiledObject, name: string): string | number | boolean | undefined {
+function prop(obj: TiledObject, name: string): TiledProperty["value"] | undefined {
   return obj.properties?.find((p) => p.name === name)?.value;
+}
+
+/** Reads an object-id property authored as a Tiled list of ints, or a lone int. */
+function idList(value: TiledProperty["value"] | undefined): number[] {
+  if (typeof value === "number") return [value];
+  if (Array.isArray(value)) return value.map((v) => v.value).filter((v): v is number => typeof v === "number");
+  return [];
 }
 
 // --- spawn -----------------------------------------------------------------
@@ -152,8 +164,8 @@ export interface DoorTrigger {
   name: string;
   rect: Rect;
   section: SectionId;
-  /** Id of the tile object (in a Buildings/.../Door layer) this trigger animates. */
-  doorTileObjectId?: number;
+  /** Ids of the tile objects (in a Buildings/.../Door layer) this trigger animates. */
+  doorTileObjectIds: number[];
 }
 
 export const DOOR_TRIGGERS: DoorTrigger[] = [];
@@ -163,13 +175,12 @@ for (const obj of ALL_LAYERS.find((l) => l.path === "Triggers/Doors")?.layer.obj
     console.warn(`[tiledWorld] Door trigger "${obj.name}" (#${obj.id}) needs a valid "section" property; skipped.`);
     continue;
   }
-  const doorTile = prop(obj, "door_tile");
   DOOR_TRIGGERS.push({
     id: obj.id,
     name: obj.name,
     rect: { x: obj.x, y: obj.y, width: obj.width, height: obj.height },
     section: section as SectionId,
-    doorTileObjectId: typeof doorTile === "number" ? doorTile : undefined,
+    doorTileObjectIds: idList(prop(obj, "door_tile")),
   });
 }
 
@@ -377,3 +388,38 @@ function buildSprites(): TileSprite[] {
 }
 
 export const BUILDING_SPRITES: TileSprite[] = buildSprites();
+
+/**
+ * Tile objects on top-level object layers ("Street", "Water Animation"...):
+ * flat decoration that always sits under the player. `order` is the layer's
+ * position among all top-level layers in the file, so Tiled's layer order
+ * (e.g. Street between Grass and Paths) is the draw order.
+ */
+function buildGroundSprites(): TileSprite[] {
+  const sprites: TileSprite[] = [];
+  TILED_MAP.layers.forEach((layer, order) => {
+    if (layer.type !== "objectgroup") return;
+    for (const obj of layer.objects ?? []) {
+      if (!obj.gid) continue;
+      const gid = obj.gid & GID_MASK;
+      const tileset = tilesetForGid(gid);
+      if (!tileset) continue;
+      sprites.push({
+        objectId: obj.id,
+        tilesetName: tileset.name,
+        frame: gid - tileset.firstgid,
+        x: obj.x,
+        bottom: obj.y,
+        width: obj.width,
+        height: obj.height,
+        layerPath: layer.name,
+        order,
+        groundLevel: true,
+        sortBottom: obj.y,
+      });
+    }
+  });
+  return sprites;
+}
+
+export const GROUND_SPRITES: TileSprite[] = buildGroundSprites();

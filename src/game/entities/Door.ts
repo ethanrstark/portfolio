@@ -7,10 +7,17 @@ import type { DoorTrigger } from "@/game/world/tiledWorld";
 import type { SectionId } from "@/portfolio/data/types";
 import { SECTIONS } from "@/portfolio/sections";
 
+/** One sprite of a door (a door can be several tiles) and the animation it plays when opened. */
+export interface DoorPiece {
+  sprite: Phaser.GameObjects.Sprite;
+  animationKey?: string;
+}
+
 /**
- * A door is a trigger rectangle from Tiled plus (optionally) the door sprite
- * it animates. Standing inside the rectangle plays the door's open/close
- * animation and offers the section prompt; Space opens the section panel.
+ * A door is a trigger rectangle from Tiled plus the door sprite(s) it
+ * animates — large doors are built from several tiles that play together.
+ * Standing inside the rectangle plays the open/close animation and offers
+ * the section prompt; Space opens the section panel.
  */
 export class Door implements Interactable {
   readonly id: string;
@@ -24,8 +31,7 @@ export class Door implements Interactable {
   constructor(
     private scene: Phaser.Scene,
     trigger: DoorTrigger,
-    private doorSprite?: Phaser.GameObjects.Sprite,
-    private openAnimationKey?: string,
+    private pieces: DoorPiece[],
   ) {
     this.id = `door-${trigger.name || trigger.id}`;
     this.sectionId = trigger.section;
@@ -58,16 +64,19 @@ export class Door implements Interactable {
   }
 
   private playOpenAnimation(): void {
-    if (!this.doorSprite || !this.openAnimationKey) return;
-    if (this.doorSprite.anims.isPlaying) return; // already mid-cycle; let it finish
-    this.doorSprite.play(this.openAnimationKey);
+    for (const { sprite, animationKey } of this.pieces) {
+      if (!animationKey || sprite.anims.isPlaying) continue; // mid-cycle: let it finish
+      sprite.play(animationKey);
+    }
   }
 
   /** A twinkle above the door, re-spawned on a delay while the player is in range. */
   private spawnSparkle(): void {
     if (!this.sparkling || !this.scene.anims.exists("ui-sparkle-twinkle")) return;
 
-    const top = this.doorSprite ? this.doorSprite.y - this.doorSprite.displayHeight : this.rect.y;
+    const top = this.pieces.length
+      ? Math.min(...this.pieces.map((p) => p.sprite.y - p.sprite.displayHeight))
+      : this.rect.y;
     const sparkle = this.scene.add
       .sprite(this.rect.centerX + Phaser.Math.Between(-12, 12), top - 6, AssetKeys.ui.sparkle[0])
       .setDepth(DEPTH.PARTICLES)
