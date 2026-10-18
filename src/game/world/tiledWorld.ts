@@ -11,7 +11,7 @@ import { SECTIONS } from "@/portfolio/sections";
  *  - Top-level tile layers "Grass", "Paths", "Water" -> the ground.
  *  - Object layers under the "Collisions" group -> blocking rectangles.
  *    (Tiles whose tileset entry has collision shapes also block; e.g. shore.)
- *  - Everything under the "Buildings" group is drawn as sprites sorted by y.
+ *  - Everything under the "Buildings" and "Decor" groups is drawn as sprites sorted by y.
  *    Layers named like "Ground"/"Shadow" sit under the player at all times;
  *    layers named like "Fence" sort tile by tile; everything else (house,
  *    door, chimney, tent, signs...) is grouped into whole objects — see
@@ -294,6 +294,8 @@ export interface TileSprite {
   sortBottom: number;
 }
 
+/** Groups whose layers are drawn as y-sorted sprites: the buildings and the "Decor" props (ruins...). */
+const SORTED_GROUP_PATTERN = /^(Buildings|Decor)\//;
 const GROUND_LAYER_PATTERN = /ground|shadow/i;
 /** Thin pieces (fences) that read correctly when each tile sorts on its own. */
 const PER_TILE_LAYER_PATTERN = /fence/i;
@@ -327,7 +329,7 @@ function buildSprites(): TileSprite[] {
   let order = 0;
 
   for (const { layer, path } of ALL_LAYERS) {
-    if (!path.startsWith("Buildings/") || layer.type === "group") continue;
+    if (!SORTED_GROUP_PATTERN.test(path) || layer.type === "group") continue;
     order++;
     const groundLevel = GROUND_LAYER_PATTERN.test(layer.name);
 
