@@ -61,7 +61,7 @@ export class WorldScene extends Phaser.Scene {
       ? keyboardDir
       : this.pointer.getDirectionToward(this.player.x, this.player.y);
 
-    this.player.updateMovement(direction);
+    this.player.updateMovement(direction, this.keyboard.isRunHeld());
 
     const body = this.player.body as Phaser.Physics.Arcade.Body;
     this.playerBounds.setTo(body.x, body.y, body.width, body.height);

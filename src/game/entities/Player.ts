@@ -1,81 +1,77 @@
 import Phaser from "phaser";
-import { AssetKeys } from "@/game/systems/AssetKeys";
-import { DEPTH, PLAYER_SCALE, PLAYER_SPEED } from "@/game/config/gameSettings";
+import {
+  STITCH_ACTIONS,
+  STITCH_DIRECTIONS,
+  stitchAnimationKey,
+  stitchFrameKey,
+  type FacingDirection,
+  type StitchAction,
+} from "@/game/systems/AssetKeys";
+import {
+  DEPTH,
+  PLAYER_BODY,
+  PLAYER_FRAME_SIZE,
+  PLAYER_RUN_SPEED,
+  PLAYER_SCALE,
+  PLAYER_WALK_SPEED,
+} from "@/game/config/gameSettings";
 import type { DirectionVector } from "@/game/input/KeyboardControls";
 
-export type FacingDirection = "up" | "down" | "left" | "right";
+const FRAME_RATES: Record<StitchAction, number> = { idle: 6, walk: 10, run: 14 };
 
 /**
- * Registers the idle/walk animations from whichever frames actually loaded
- * (the placeholder character art — see AssetManifest.ts). Frame keys are looked up at
- * animation-creation time so this never needs to change when Stitch's real
- * sprite replaces the current stand-in, as long as the frame counts match
- * AssetKeys.stitch.
+ * Registers one looping animation per action and direction from whichever
+ * numbered frames actually loaded (see AssetManifest.ts), so each animation
+ * may have a different frame count and a missing one is simply skipped.
  */
 export function createStitchAnimations(scene: Phaser.Scene): void {
-  const dirs: FacingDirection[] = ["down", "up", "left", "right"];
-
-  for (const dir of dirs) {
-    const idleFrames = AssetKeys.stitch.idle[dir].filter((key) => scene.textures.exists(key));
-    const runFrames = AssetKeys.stitch.run[dir].filter((key) => scene.textures.exists(key));
-
-    if (idleFrames.length > 0) {
-      scene.anims.create({
-        key: `stitch-idle-${dir}`,
-        frames: idleFrames.map((key) => ({ key })),
-        frameRate: 5,
-        repeat: -1,
-      });
-    }
-    if (runFrames.length > 0) {
-      scene.anims.create({
-        key: `stitch-walk-${dir}`,
-        frames: runFrames.map((key) => ({ key })),
-        frameRate: 12,
-        repeat: -1,
-      });
+  for (const action of STITCH_ACTIONS) {
+    for (const dir of STITCH_DIRECTIONS) {
+      const frames: { key: string }[] = [];
+      while (scene.textures.exists(stitchFrameKey(action, dir, frames.length + 1))) {
+        frames.push({ key: stitchFrameKey(action, dir, frames.length + 1) });
+      }
+      if (frames.length === 0) continue;
+      scene.anims.create({ key: stitchAnimationKey(action, dir), frames, frameRate: FRAME_RATES[action], repeat: -1 });
     }
   }
 }
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
-  private facing: FacingDirection = "down";
+  private facing: FacingDirection = "south";
 
+  /** `x`/`y` is where Stitch's feet (the middle of his collision box's bottom edge) stand. */
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, AssetKeys.stitch.idle.down[0]);
+    super(scene, x, y, stitchFrameKey("idle", "south", 1));
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    this.setOrigin(0.5, 0.85);
     this.setScale(PLAYER_SCALE);
     this.setCollideWorldBounds(true);
+
+    // Pivot on the feet so the sprite's position is his ground position.
+    this.setOrigin((PLAYER_BODY.x + PLAYER_BODY.width / 2) / PLAYER_FRAME_SIZE, (PLAYER_BODY.y + PLAYER_BODY.height) / PLAYER_FRAME_SIZE);
 
     // Body size/offset are in the frame's native (unscaled) pixels — Arcade
     // Physics applies the sprite's scale to the body automatically.
     const body = this.body as Phaser.Physics.Arcade.Body;
-    const frameWidth = this.frame.width;
-    const frameHeight = this.frame.height;
-    body.setSize(frameWidth * 0.55, frameHeight * 0.35);
-    body.setOffset(frameWidth * 0.22, frameHeight * 0.62);
+    body.setSize(PLAYER_BODY.width, PLAYER_BODY.height);
+    body.setOffset(PLAYER_BODY.x, PLAYER_BODY.y);
 
-    this.play("stitch-idle-down");
+    this.play(stitchAnimationKey("idle", "south"));
   }
 
   /** Applies velocity + picks the right animation from a normalized direction vector. */
-  updateMovement(direction: DirectionVector): void {
+  updateMovement(direction: DirectionVector, running = false): void {
     const moving = direction.x !== 0 || direction.y !== 0;
 
     const velocity = new Phaser.Math.Vector2(direction.x, direction.y);
-    if (velocity.lengthSq() > 0) velocity.normalize().scale(PLAYER_SPEED);
+    if (moving) velocity.normalize().scale(running ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED);
     this.setVelocity(velocity.x, velocity.y);
 
-    if (moving) {
-      this.facing = this.resolveFacing(direction);
-      this.play(`stitch-walk-${this.facing}`, true);
-    } else {
-      this.play(`stitch-idle-${this.facing}`, true);
-    }
-
+    if (moving) this.facing = this.resolveFacing(direction);
+    const action: StitchAction = !moving ? "idle" : running ? "run" : "walk";
+    this.play(stitchAnimationKey(action, this.facing), true);
   }
 
   /**
@@ -92,11 +88,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // Prefer whichever axis has motion; if both, keep the previous facing's
     // axis when possible so diagonal movement doesn't feel twitchy.
     if (direction.x !== 0 && direction.y !== 0) {
-      const preferHorizontal = this.facing === "left" || this.facing === "right";
-      if (preferHorizontal) return direction.x < 0 ? "left" : "right";
-      return direction.y < 0 ? "up" : "down";
+      const preferHorizontal = this.facing === "west" || this.facing === "east";
+      if (preferHorizontal) return direction.x < 0 ? "west" : "east";
+      return direction.y < 0 ? "north" : "south";
     }
-    if (direction.x !== 0) return direction.x < 0 ? "left" : "right";
-    return direction.y < 0 ? "up" : "down";
+    if (direction.x !== 0) return direction.x < 0 ? "west" : "east";
+    return direction.y < 0 ? "north" : "south";
   }
 }

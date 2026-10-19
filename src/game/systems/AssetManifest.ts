@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { AssetKeys } from "./AssetKeys";
+import { AssetKeys, STITCH_ACTIONS, STITCH_DIRECTIONS, stitchFrameKey, type FacingDirection, type StitchAction } from "./AssetKeys";
 
 /**
  * Wires real art files (dropped under src/assets/...) to the AssetKeys the
@@ -8,14 +8,14 @@ import { AssetKeys } from "./AssetKeys";
  * adding a real asset never requires touching this file's glob patterns,
  * only (if it's a brand-new category) the small `pick()` list below.
  *
- * Stitch's final animated sprite isn't ready yet, so a generic placeholder
- * character (src/assets/characters/stitch/placeholder/) stands in for it.
- * Swapping in the real Stitch later means replacing the files this globs
- * over — no code changes needed as long as the frame counts match
- * AssetKeys.stitch (4 idle / 6 run frames per direction).
+ * Stitch's frames live under src/assets/characters/stitch/ as
+ * `<action>/<action>_<direction>_<n>.png` (actions idle/walk/run, directions
+ * north/east/south/west, n starting at 1). Every matching file is picked up
+ * and each animation uses however many frames exist, so replacing the art
+ * never needs code changes as long as the naming and 64x64 frame size hold.
  */
 
-const stitchPlaceholder = import.meta.glob("/src/assets/characters/stitch/placeholder/*.png", {
+const stitchFrames = import.meta.glob("/src/assets/characters/stitch/**/*.png", {
   eager: true,
   query: "?url",
   import: "default",
@@ -31,6 +31,14 @@ const sparkles = import.meta.glob("/src/assets/ui/*.png", {
 function pick(map: Record<string, string>, filename: string): string | undefined {
   const path = Object.keys(map).find((p) => p.endsWith(`/${filename}`));
   return path ? map[path] : undefined;
+}
+
+const STITCH_FILE = new RegExp(`^(${STITCH_ACTIONS.join("|")})_(${STITCH_DIRECTIONS.join("|")})_(\\d+)\\.png$`);
+
+/** Reads "idle_south_3.png" into its action, direction and frame number; other files are ignored. */
+export function parseStitchFrame(path: string): { action: StitchAction; dir: FacingDirection; frame: number } | undefined {
+  const match = STITCH_FILE.exec(path.slice(path.lastIndexOf("/") + 1));
+  return match ? { action: match[1] as StitchAction, dir: match[2] as FacingDirection, frame: Number(match[3]) } : undefined;
 }
 
 export interface ImageAsset {
@@ -49,26 +57,10 @@ export function collectRealAssets(): ImageAsset[] {
     if (url) assets.push({ key, url });
   };
 
-  // Stitch placeholder character.
-  const idleFileFor: Record<"down" | "up" | "left" | "right", string> = {
-    down: "idle_front",
-    up: "idle_back",
-    left: "idle_left",
-    right: "idle_right",
-  };
-  const runFileFor: Record<"down" | "up" | "left" | "right", string> = {
-    down: "run_forward",
-    up: "run_backward",
-    left: "run_left",
-    right: "run_right",
-  };
-  for (const dir of ["down", "up", "left", "right"] as const) {
-    AssetKeys.stitch.idle[dir].forEach((key, i) => {
-      add(key, pick(stitchPlaceholder, `${idleFileFor[dir]}_000${i + 1}.png`));
-    });
-    AssetKeys.stitch.run[dir].forEach((key, i) => {
-      add(key, pick(stitchPlaceholder, `${runFileFor[dir]}_000${i + 1}.png`));
-    });
+  // Stitch's frames, found by file name.
+  for (const [path, url] of Object.entries(stitchFrames)) {
+    const parsed = parseStitchFrame(path);
+    if (parsed) add(stitchFrameKey(parsed.action, parsed.dir, parsed.frame), url);
   }
 
   // UI sparkle animation frames.

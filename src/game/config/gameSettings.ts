@@ -6,11 +6,20 @@
 export const GAME_WIDTH = 1024;
 export const GAME_HEIGHT = 640;
 
-export const PLAYER_SPEED = 200;
+export const PLAYER_WALK_SPEED = 150;
+/** Held with Shift. */
+export const PLAYER_RUN_SPEED = 240;
 
-// The placeholder character art is ~28-31px; against the map's 32px tiles
-// and 32px-wide doors this keeps Stitch about one tile wide.
-export const PLAYER_SCALE = 1.2;
+/** Stitch's frames are 64x64 and drawn at their native pixel size, like the map's tiles. */
+export const PLAYER_FRAME_SIZE = 64;
+export const PLAYER_SCALE = 1;
+
+/**
+ * His collision box inside a frame, in frame pixels measured from the top-left
+ * (0,0): from (25,40) to (38,45), i.e. a small box under his feet. Everything
+ * above it can overlap scenery, which is what lets him walk behind buildings.
+ */
+export const PLAYER_BODY = { x: 25, y: 40, width: 13, height: 5 } as const;
 
 /**
  * Depth (z-order) bands. Anything that needs to visually overlap the player

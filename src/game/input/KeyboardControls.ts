@@ -5,7 +5,7 @@ export interface DirectionVector {
   y: -1 | 0 | 1;
 }
 
-/** Arrow-key movement + Space for interaction. WASD is intentionally not bound (spec). */
+/** Arrow-key movement (Shift to run) + Space for interaction. WASD is intentionally not bound (spec). */
 export class KeyboardControls {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private spaceKey: Phaser.Input.Keyboard.Key;
@@ -19,6 +19,11 @@ export class KeyboardControls {
     const x = this.cursors.left.isDown ? -1 : this.cursors.right.isDown ? 1 : 0;
     const y = this.cursors.up.isDown ? -1 : this.cursors.down.isDown ? 1 : 0;
     return { x, y };
+  }
+
+  /** Holding Shift while moving makes Stitch run instead of walk. */
+  isRunHeld(): boolean {
+    return this.cursors.shift.isDown;
   }
 
   isAnyDirectionHeld(): boolean {
