@@ -7,9 +7,14 @@ export const GAME_WIDTH = 1024;
 export const GAME_HEIGHT = 640;
 
 /** How far the camera is zoomed in; higher shows less of the world and makes everything bigger. */
-export const CAMERA_ZOOM = 1.5;
+export const CAMERA_ZOOM = 2;
 
-export const PLAYER_WALK_SPEED = 150;
+/**
+ * Keep these multiples of 60 (physics runs at 60 steps/second): Stitch then
+ * moves a whole number of pixels per step, so he never sits on a half-pixel
+ * where the camera and the sprite round in opposite directions and jitter.
+ */
+export const PLAYER_WALK_SPEED = 180;
 /** Held with Shift. */
 export const PLAYER_RUN_SPEED = 240;
 
