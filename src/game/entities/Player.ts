@@ -17,7 +17,8 @@ import {
 } from "@/game/config/gameSettings";
 import type { DirectionVector } from "@/game/input/KeyboardControls";
 
-const FRAME_RATES: Record<StitchAction, number> = { idle: 6, walk: 10, run: 14 };
+/** Frames per second for each action; lower the idle number to slow the idle animation. */
+const FRAME_RATES: Record<StitchAction, number> = { idle: 4, walk: 10, run: 14 };
 
 /**
  * Registers one looping animation per action and direction from whichever

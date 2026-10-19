@@ -6,6 +6,9 @@
 export const GAME_WIDTH = 1024;
 export const GAME_HEIGHT = 640;
 
+/** How far the camera is zoomed in; higher shows less of the world and makes everything bigger. */
+export const CAMERA_ZOOM = 1.5;
+
 export const PLAYER_WALK_SPEED = 150;
 /** Held with Shift. */
 export const PLAYER_RUN_SPEED = 240;
