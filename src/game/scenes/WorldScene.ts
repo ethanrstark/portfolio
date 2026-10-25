@@ -43,7 +43,12 @@ export class WorldScene extends Phaser.Scene {
       this.inputEnabled = !open;
       this.interactions.setEnabled(!open);
       if (open) this.pointer.cancel();
+      // While a window is open the keys (Space, arrows) belong to the page, not the game.
+      const keyboard = this.input.keyboard;
+      if (open) keyboard?.disableGlobalCapture();
+      else keyboard?.enableGlobalCapture();
     });
+    eventBus.emit("game:ready");
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => eventBus.removeAllListeners());
   }

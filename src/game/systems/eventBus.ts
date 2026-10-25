@@ -18,6 +18,8 @@ export type GameEvents = {
   "ui:openSection": (sectionId: SectionId) => void;
   /** UI -> Game: a panel opened/closed; game pauses movement input while a panel is open. */
   "ui:panelState": (open: boolean) => void;
+  /** Game -> UI: the world is built and listening, so the UI can re-send state it announced earlier. */
+  "game:ready": () => void;
   /** UI -> Game: mute toggle from the UI layer. */
   "audio:setMuted": (muted: boolean) => void;
 };

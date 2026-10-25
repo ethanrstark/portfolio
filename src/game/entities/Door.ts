@@ -35,7 +35,7 @@ export class Door implements Interactable {
   ) {
     this.id = `door-${trigger.name || trigger.id}`;
     this.sectionId = trigger.section;
-    this.prompt = SECTIONS[trigger.section].title;
+    this.prompt = SECTIONS[trigger.section].promptVerb;
     this.rect = new Phaser.Geom.Rectangle(trigger.rect.x, trigger.rect.y, trigger.rect.width, trigger.rect.height);
   }
 

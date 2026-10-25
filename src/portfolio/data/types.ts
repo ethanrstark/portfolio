@@ -76,6 +76,8 @@ export interface LinkEntry {
 export interface AboutInfo {
   name: string;
   tagline: string;
+  /** The greeting shown in the welcome dialogue when the site opens. */
+  intro: string;
   bio: string[];
   funFacts?: string[];
 }

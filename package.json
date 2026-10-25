@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/pixelify-sans": "^5.3.0",
     "phaser": "^3.80.1"
   },
   "devDependencies": {
