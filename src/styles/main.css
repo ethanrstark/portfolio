@@ -16,7 +16,9 @@
   --wood-d: #5a2e14;
   --green: #2e9e3e;
   --bg: #0f1a12;
-  --font-ui: "Pixelify Sans", "Trebuchet MS", "Segoe UI", sans-serif;
+  /* Both fonts have a single weight, so emphasis comes from size and colour, never bold. */
+  --font-display: "Jersey 10", "Trebuchet MS", sans-serif;
+  --font-body: "DotGothic16", "Trebuchet MS", "Segoe UI", sans-serif;
   --frame-panel: url("../assets/ui/frames/panel.png");
   --frame-hud: url("../assets/ui/frames/hud.png");
   --frame-card: url("../assets/ui/frames/card.png");
@@ -31,9 +33,10 @@ body {
   margin: 0;
   height: 100%;
   background: var(--bg);
-  font-family: var(--font-ui);
-  font-size: 17px;
+  font-family: var(--font-body);
+  font-size: 16px;
   line-height: 1.5;
+  font-synthesis: none;
   color: var(--ink);
   overflow: hidden;
 }
@@ -130,7 +133,6 @@ dd {
   border: 8px solid transparent;
   border-image: url("../assets/ui/frames/btn-gold.png") 4 fill / 8px stretch;
   image-rendering: pixelated;
-  font-weight: 700;
   line-height: 1.1;
   color: var(--ink);
   text-align: center;
@@ -183,7 +185,6 @@ dd {
   border-image: url("../assets/ui/frames/btn-wood.png") 4 fill / 8px stretch;
   image-rendering: pixelated;
   color: var(--parch);
-  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -387,7 +388,6 @@ dd {
 }
 
 .menu-item__title {
-  font-weight: 700;
   font-size: 18px;
   line-height: 1.15;
 }
@@ -426,7 +426,6 @@ dd {
   box-shadow: 0 3px 0 var(--ink);
   font-family: inherit;
   font-size: 15px;
-  font-weight: 700;
   line-height: 22px;
   text-align: center;
 }
@@ -522,7 +521,6 @@ dd {
   align-items: center;
   gap: 10px;
   padding: 6px 8px 6px 20px;
-  font-weight: 600;
   font-size: 17px;
   line-height: 1.15;
   text-align: left;
@@ -578,7 +576,6 @@ dd {
 /* ------------------------------------------------------- section content -*/
 .section-tagline {
   font-size: 19px;
-  font-weight: 700;
   color: var(--wood);
 }
 
@@ -659,7 +656,6 @@ dd {
   border: 2px solid var(--ink);
   box-shadow: 0 2px 0 var(--gold-d);
   font-size: 14px;
-  font-weight: 600;
   line-height: 20px;
 }
 
@@ -683,7 +679,6 @@ dd {
   flex: 1;
   min-height: 44px;
   padding: 2px 14px;
-  font-weight: 700;
   border: 8px solid transparent;
   border-image: var(--frame-card) 4 fill / 8px stretch;
   image-rendering: pixelated;
@@ -706,7 +701,6 @@ dd {
   border-image: url("../assets/ui/frames/btn-wood.png") 4 fill / 8px stretch;
   image-rendering: pixelated;
   color: var(--parch);
-  font-weight: 700;
   font-size: 15px;
 }
 
@@ -735,7 +729,6 @@ dd {
   border: 4px solid var(--ink);
   box-shadow: inset -4px -4px 0 var(--gold-d);
   font-size: 26px;
-  font-weight: 700;
 }
 
 .about-header__name {
@@ -777,7 +770,6 @@ dd {
   border-image: url("../assets/ui/frames/btn-wood.png") 4 fill / 8px stretch;
   image-rendering: pixelated;
   color: var(--parch);
-  font-weight: 700;
   font-size: 16px;
 }
 
@@ -844,7 +836,6 @@ dd {
 
 .resume-glance__value {
   font-size: 18px;
-  font-weight: 600;
 }
 
 /* ------------------------------------------------------- project viewer --*/
@@ -869,7 +860,6 @@ dd {
   border: 2px solid var(--ink);
   color: #fff;
   font-size: 13px;
-  font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 18px;
 }
@@ -993,7 +983,6 @@ dd {
 .minimap__label {
   margin-bottom: 4px;
   font-size: 13px;
-  font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gold);
@@ -1020,7 +1009,6 @@ dd {
   image-rendering: pixelated;
   color: var(--parch);
   font-size: 19px;
-  font-weight: 600;
   white-space: nowrap;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
@@ -1038,9 +1026,152 @@ dd {
   box-shadow: 0 3px 0 var(--gold-d);
   color: var(--ink);
   font-size: 14px;
-  font-weight: 700;
   letter-spacing: 0.08em;
   line-height: 22px;
+}
+
+/* ------------------------------------------------------------- display font
+   Headings, buttons and labels use the display font. It draws smaller than
+   the body font at the same size, so its sizes run larger. */
+.btn,
+.hud-button,
+.menu-dialog__eyebrow,
+.menu-dialog__heading,
+.menu-dialog__subheading,
+.speech__name strong,
+.menu-item__title,
+.keycap,
+.panel-dialog__title,
+.panel-nav__item,
+.section-tagline,
+.section-subheading,
+.entry-card__title,
+.project-card__title,
+.project-card__badge,
+.tag,
+.about-header__name,
+.about-header__avatar,
+.link-pill,
+.project-card__view,
+.project-detail__back,
+.project-detail__title,
+.links-list__item-link,
+.links-list__copy,
+.resume-glance__label,
+.resume-glance__value,
+.minimap__label,
+.interaction-prompt,
+.interaction-prompt__key,
+.lightbox__close {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+.btn,
+.hud-button,
+.links-list__item-link,
+.panel-nav__item {
+  font-size: 22px;
+}
+
+.menu-dialog__eyebrow,
+.menu-dialog__subheading,
+.section-subheading,
+.resume-glance__label {
+  font-size: 20px;
+  letter-spacing: 0.12em;
+}
+
+.menu-dialog__heading {
+  font-size: clamp(46px, 8vw, 68px);
+  line-height: 1;
+}
+
+.speech__name strong,
+.resume-glance__value {
+  font-size: 24px;
+}
+
+.menu-item__title {
+  font-size: 25px;
+}
+
+.menu-item__blurb,
+.menu-dialog__speech,
+.controls__action {
+  font-size: 15px;
+}
+
+.menu-dialog__speech {
+  font-size: 17px;
+}
+
+.keycap,
+.tag,
+.interaction-prompt__key,
+.links-list__copy,
+.project-card__badge {
+  font-size: 19px;
+}
+
+.keycap {
+  line-height: 22px;
+}
+
+.panel-dialog__title {
+  font-size: 44px;
+}
+
+.section-tagline {
+  font-size: 26px;
+}
+
+.entry-card__title,
+.project-card__title {
+  font-size: 30px;
+}
+
+.about-header__name,
+.about-header__avatar {
+  font-size: 38px;
+}
+
+.about-header__avatar {
+  font-size: 34px;
+}
+
+.project-detail__title {
+  font-size: 38px;
+}
+
+.link-pill,
+.project-card__view,
+.project-detail__back {
+  font-size: 21px;
+}
+
+.minimap__label {
+  font-size: 18px;
+}
+
+.interaction-prompt {
+  font-size: 24px;
+}
+
+.menu-dialog__start {
+  font-size: 28px;
+}
+
+.entry-card__meta,
+.project-card__desc,
+.controls__note,
+.speech__name,
+.resume-viewer__updated {
+  font-size: 15px;
+}
+
+.project-card__desc {
+  font-size: 15px;
 }
 
 /* ------------------------------------------------------------ responsive */
@@ -1053,11 +1184,6 @@ dd {
 }
 
 @media (max-width: 720px) {
-  html,
-  body {
-    font-size: 16px;
-  }
-
   .menu-list {
     grid-template-columns: 1fr;
   }
@@ -1102,7 +1228,7 @@ dd {
   }
 
   .panel-dialog__title {
-    font-size: 24px;
+    font-size: 34px;
   }
 
   .minimap {
@@ -1112,7 +1238,7 @@ dd {
 
   .interaction-prompt {
     bottom: 14px;
-    font-size: 16px;
+    font-size: 21px;
   }
 }
 
@@ -1143,7 +1269,7 @@ dd {
   .menu-dialog__start {
     flex: 1;
     padding: 2px 10px;
-    font-size: 18px;
+    font-size: 24px;
   }
 
   .menu-overlay,

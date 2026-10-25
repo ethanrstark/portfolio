@@ -292,6 +292,11 @@ export interface TileSprite {
    * standing behind the house.
    */
   sortBottom: number;
+  /**
+   * A small decoration with no collision box (a bush, a pebble): Stitch can
+   * walk right over it, so it is drawn flat under him instead of sorted.
+   */
+  flatDecor: boolean;
 }
 
 /** Groups whose layers are drawn as y-sorted sprites: the buildings and the "Decor" props (ruins...). */
@@ -300,8 +305,19 @@ const GROUND_LAYER_PATTERN = /ground|shadow/i;
 /** Thin pieces (fences) that read correctly when each tile sorts on its own. */
 const PER_TILE_LAYER_PATTERN = /fence/i;
 
-/** Groups sprites that touch into whole objects; each gets the lowest bottom edge among its members. */
-function assignObjectSortBottoms(sprites: TileSprite[]): void {
+const DECOR_PATTERN = /^Decor\//;
+
+/**
+ * Groups sprites that touch into whole objects and decides where Stitch
+ * passes from behind each one to in front of it.
+ *
+ *  - An object with a collision box sorts on the bottom of that box: he is
+ *    in front of it as soon as his feet reach the box's south side, however
+ *    far down the art itself extends.
+ *  - An object with no collision box sorts on the lowest edge of its art, or,
+ *    if it is a decoration he can walk over, is drawn flat beneath him.
+ */
+function assignObjectSortBottoms(sprites: TileSprite[], collisions: Rect[]): void {
   const parent = sprites.map((_, i) => i);
   const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i])));
 
@@ -314,14 +330,49 @@ function assignObjectSortBottoms(sprites: TileSprite[]): void {
     }
   }
 
-  const bottomByRoot = new Map<number, number>();
+  const members = new Map<number, TileSprite[]>();
   sprites.forEach((s, i) => {
     const root = find(i);
-    bottomByRoot.set(root, Math.max(bottomByRoot.get(root) ?? -Infinity, s.bottom));
+    members.set(root, [...(members.get(root) ?? []), s]);
   });
-  sprites.forEach((s, i) => {
-    s.sortBottom = bottomByRoot.get(find(i))!;
-  });
+
+  for (const object of members.values()) {
+    const left = Math.min(...object.map((s) => s.x));
+    const right = Math.max(...object.map((s) => s.x + s.width));
+    const top = Math.min(...object.map((s) => s.bottom - s.height));
+    const artBottom = Math.max(...object.map((s) => s.bottom));
+
+    const blocking = collisions.filter(
+      (r) => r.x < right && r.x + r.width > left && r.y < artBottom && r.y + r.height > top,
+    );
+    const flat = blocking.length === 0 && object.every((s) => DECOR_PATTERN.test(s.layerPath));
+    for (const s of object) {
+      s.sortBottom = blocking.length ? collisionBottomFor(s, blocking) : artBottom;
+      s.flatDecor = flat;
+    }
+  }
+}
+
+/**
+ * The bottom of the collision box a tile belongs to. Among the boxes under
+ * its columns (or, for a tile overhanging the box like canopy beside a
+ * trunk, the nearest ones sideways), it is the box the tile overlaps, else
+ * the closest one below it, else the closest one above. Objects made of
+ * several boxes at different heights (ruins) therefore sort piece by piece,
+ * not all on their lowest edge.
+ */
+function collisionBottomFor(sprite: TileSprite, blocking: Rect[]): number {
+  const gap = (r: Rect) => Math.max(r.x - (sprite.x + sprite.width), sprite.x - (r.x + r.width), 0);
+  const nearest = Math.min(...blocking.map(gap));
+  const candidates = blocking.filter((r) => gap(r) === nearest);
+  const bottomOf = (r: Rect) => r.y + r.height;
+  const top = sprite.bottom - sprite.height;
+
+  const overlapping = candidates.filter((r) => r.y < sprite.bottom && bottomOf(r) > top);
+  if (overlapping.length) return Math.max(...overlapping.map(bottomOf));
+  const below = candidates.filter((r) => r.y >= sprite.bottom);
+  if (below.length) return Math.min(...below.map(bottomOf));
+  return Math.max(...candidates.map(bottomOf));
 }
 
 function buildSprites(): TileSprite[] {
@@ -352,6 +403,7 @@ function buildSprites(): TileSprite[] {
           order,
           groundLevel,
           sortBottom: obj.y,
+          flatDecor: false,
         });
       }
     } else if (layer.type === "tilelayer" && layer.data && layer.width) {
@@ -371,6 +423,7 @@ function buildSprites(): TileSprite[] {
           order,
           groundLevel,
           sortBottom: (Math.floor(index / layer.width!) + 1) * TILED_MAP.tileheight,
+          flatDecor: false,
         });
       });
     }
@@ -384,7 +437,7 @@ function buildSprites(): TileSprite[] {
     const group = s.layerPath.split("/")[1];
     byGroup.set(group, [...(byGroup.get(group) ?? []), s]);
   }
-  for (const group of byGroup.values()) assignObjectSortBottoms(group);
+  for (const group of byGroup.values()) assignObjectSortBottoms(group, COLLISION_RECTS);
 
   return sprites;
 }
@@ -418,6 +471,7 @@ function buildGroundSprites(): TileSprite[] {
         order,
         groundLevel: true,
         sortBottom: obj.y,
+        flatDecor: false,
       });
     }
   });
