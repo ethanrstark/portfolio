@@ -1,56 +1,23 @@
+export const STITCH_ACTIONS = ["idle", "walk", "run"] as const;
+export const STITCH_DIRECTIONS = ["north", "east", "south", "west"] as const;
+
+export type StitchAction = (typeof STITCH_ACTIONS)[number];
+export type FacingDirection = (typeof STITCH_DIRECTIONS)[number];
+
+/** Texture key for one frame of Stitch's art; `frame` is the 1-based number in the file name. */
+export const stitchFrameKey = (action: StitchAction, dir: FacingDirection, frame: number) =>
+  `stitch-${action}-${dir}-${frame}`;
+
+/** Animation key for one action/direction pair. */
+export const stitchAnimationKey = (action: StitchAction, dir: FacingDirection) => `stitch-${action}-${dir}`;
+
 /**
- * Centralized texture/asset keys. Phase 1 generates all of these as
- * placeholder textures at runtime (see PlaceholderTextures.ts) instead of
- * loading image files. To swap in real art later: drop files under
- * src/assets/... matching these names, load them in BootScene with
- * `this.load.image(key, path)` / `this.load.spritesheet(...)`, and delete
- * the matching generator call — no other code needs to change because
- * every consumer only ever references these keys.
+ * Centralized texture/asset keys for the hand-loaded art (UI, plus Stitch's
+ * key helpers above). World art comes from the Tiled map's tilesets instead
+ * — see TiledAssets.ts.
  */
 export const AssetKeys = {
-  stitch: {
-    down: "stitch-down",
-    downStep: "stitch-down-step",
-    up: "stitch-up",
-    upStep: "stitch-up-step",
-    left: "stitch-left",
-    leftStep: "stitch-left-step",
-    right: "stitch-right",
-    rightStep: "stitch-right-step",
-  },
-  terrain: {
-    grass: "terrain-grass",
-    path: "terrain-path",
-    sand: "terrain-sand",
-    water: "terrain-water",
-    snow: "terrain-snow",
-    stone: "terrain-stone",
-  },
-  buildings: {
-    about: "building-about",
-    projects: "building-projects",
-    education: "building-education",
-    experience: "building-experience",
-    skills: "building-skills",
-    links: "building-links",
-    creative: "building-creative",
-  },
-  decorations: {
-    tree: "deco-tree",
-    pine: "deco-pine",
-    bush: "deco-bush",
-    flower: "deco-flower",
-    rock: "deco-rock",
-    bench: "deco-bench",
-    lamp: "deco-lamp",
-    sign: "deco-sign",
-    fountain: "deco-fountain",
-    bridge: "deco-bridge",
-  },
-  npc: {
-    base: "npc-base",
-  },
   ui: {
-    sparkle: "ui-sparkle",
+    sparkle: Array.from({ length: 6 }, (_, i) => `ui-sparkle-${i}`),
   },
 } as const;

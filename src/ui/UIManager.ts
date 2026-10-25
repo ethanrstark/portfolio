@@ -11,7 +11,8 @@ import {
 } from "@/ui/panels/sectionContent";
 import { renderProjectViewer } from "@/ui/project-viewer/ProjectViewer";
 import { renderResumeViewer } from "@/ui/resume-viewer/ResumeViewer";
-import { HamburgerMenu } from "@/ui/navigation/HamburgerMenu";
+import { MainMenu } from "@/ui/navigation/MainMenu";
+import type { NavTarget } from "@/ui/navigation/navItems";
 import { Minimap } from "@/ui/minimap/Minimap";
 import { InteractionPrompt } from "@/ui/dialogue/InteractionPrompt";
 import { projects, creativeProjects } from "@/portfolio/data/projects";
@@ -26,49 +27,56 @@ const SECTION_RENDERERS: Record<SectionId, () => HTMLElement> = {
   links: renderLinks,
 };
 
+const RESUME_TITLE = "Resume";
+
 /**
  * Owns every HTML/CSS UI widget and is the only place that decides whether
  * the game should be "paused" (movement/interaction disabled) — it tracks
- * whether the menu and/or a content panel are open and emits a single
+ * whether the main menu and/or a content panel are open and emits a single
  * combined `ui:panelState` event the game layer reacts to.
  */
 export class UIManager {
   private panel: Panel;
-  private menu: HamburgerMenu;
+  private menu: MainMenu;
   private menuOpen = false;
   private panelOpen = false;
 
   constructor(root: HTMLElement) {
-    this.panel = new Panel(root, (open) => this.setOverlayState("panel", open));
-    this.menu = new HamburgerMenu(
-      root,
-      {
-        onOpenSection: (id) => this.openSection(id),
-        onOpenResume: () => this.openResume(),
+    this.panel = new Panel(root, {
+      onOpenChange: (open) => this.setOverlayState("panel", open),
+      onNavigate: (target) => this.open(target),
+      onHome: () => {
+        this.panel.close();
+        this.menu.open(false);
       },
-      (open) => this.setOverlayState("menu", open),
-    );
+    });
+    this.menu = new MainMenu(root, (target) => this.open(target), (open) => this.setOverlayState("menu", open));
 
-    new Minimap(root, (id) => this.openSection(id));
+    new Minimap(root, (id) => this.open(id));
     new InteractionPrompt(root);
 
-    eventBus.on("interaction:activate", (id) => this.openSection(id));
-    eventBus.on("ui:openSection", (id) => this.openSection(id));
+    eventBus.on("interaction:activate", (id) => this.open(id));
+    eventBus.on("ui:openSection", (id) => this.open(id));
+    // The welcome menu opens before the game scene is listening, so repeat the pause state once it is.
+    eventBus.on("game:ready", () => this.emitState());
+
+    // The landing page: greet every visitor with the full menu before the game starts.
+    this.menu.open(true);
   }
 
-  private openSection(id: SectionId): void {
+  private open(target: NavTarget): void {
     this.menu.close();
-    this.panel.open(SECTIONS[id].title, SECTION_RENDERERS[id]());
-  }
-
-  private openResume(): void {
-    this.menu.close();
-    this.panel.open("Resume", renderResumeViewer());
+    if (target === "resume") this.panel.open(target, RESUME_TITLE, renderResumeViewer());
+    else this.panel.open(target, SECTIONS[target].title, SECTION_RENDERERS[target]());
   }
 
   private setOverlayState(source: "panel" | "menu", open: boolean): void {
     if (source === "panel") this.panelOpen = open;
     else this.menuOpen = open;
+    this.emitState();
+  }
+
+  private emitState(): void {
     eventBus.emit("ui:panelState", this.panelOpen || this.menuOpen);
   }
 }

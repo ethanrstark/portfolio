@@ -1,20 +1,27 @@
 import Phaser from "phaser";
-import { generatePlaceholderTextures } from "@/game/systems/PlaceholderTextures";
+import { preloadRealAssets, createSparkleAnimation } from "@/game/systems/AssetManifest";
 import { createStitchAnimations } from "@/game/entities/Player";
+import { createTileAnimations, preloadTiledAssets, registerTiledMap } from "@/game/systems/TiledAssets";
 
 /**
- * Generates all placeholder textures + animations once, then hands off to
- * WorldScene. Kept separate from WorldScene so a future real asset-loading
- * step (this.load.image/spritesheet/audio) has an obvious home.
+ * Loads Stitch/UI art and the Tiled map's tilesets, registers the map and
+ * builds every animation, then hands off to WorldScene.
  */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super("Boot");
   }
 
+  preload(): void {
+    preloadRealAssets(this);
+    preloadTiledAssets(this);
+  }
+
   create(): void {
-    generatePlaceholderTextures(this);
+    registerTiledMap(this);
+    createTileAnimations(this);
     createStitchAnimations(this);
+    createSparkleAnimation(this);
     this.scene.start("World");
   }
 }
