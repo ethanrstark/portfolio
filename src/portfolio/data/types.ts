@@ -1,4 +1,10 @@
 /**
+ * Text fields on these types (bios, descriptions, bullet points, summaries)
+ * can use inline styling:
+ *   **bold**   *emphasis*   `code`   [link text](https://example.com)
+ * and a backslash shows a symbol literally, e.g. \* for a plain asterisk.
+ * Titles, names, dates and tags are always plain text.
+ *
  * Shared content types for all portfolio data. Game/UI systems should only
  * ever depend on these shapes, never on hard-coded content, so that adding
  * or editing portfolio content never requires touching engine code.

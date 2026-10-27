@@ -1,4 +1,4 @@
-import { el, externalLink } from "@/ui/utils";
+import { el, externalLink, richEl } from "@/ui/utils";
 import type { Project } from "@/portfolio/data/types";
 
 /**
@@ -29,7 +29,7 @@ function showList(container: HTMLElement, items: Project[]): void {
     const card = el("article", "project-card");
     if (project.featured) card.append(el("span", "project-card__badge", "★ Featured"));
     card.append(el("h3", "project-card__title", project.title));
-    card.append(el("p", "project-card__desc", project.shortDescription));
+    card.append(richEl("p", "project-card__desc", project.shortDescription));
 
     if (project.technologies.length) {
       const tags = el("div", "tag-row");
@@ -59,7 +59,7 @@ function showDetail(container: HTMLElement, project: Project, allItems: Project[
   if (project.featured) titleRow.append(el("span", "project-card__badge", "★ Featured"));
   detail.append(titleRow);
 
-  detail.append(el("p", "section-paragraph", project.description));
+  detail.append(richEl("p", "section-paragraph", project.description));
 
   if (project.technologies.length) {
     const tags = el("div", "tag-row");

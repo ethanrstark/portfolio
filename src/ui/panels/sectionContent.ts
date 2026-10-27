@@ -1,4 +1,4 @@
-import { el } from "@/ui/utils";
+import { el, richEl } from "@/ui/utils";
 import { aboutInfo } from "@/portfolio/data/about";
 import { education } from "@/portfolio/data/education";
 import { experience } from "@/portfolio/data/experience";
@@ -56,13 +56,13 @@ export function renderAbout(): HTMLElement {
   const headerText = el("div", "about-header__text");
   headerText.append(
     el("h3", "about-header__name", aboutInfo.name),
-    el("p", "section-tagline", aboutInfo.tagline),
+    richEl("p", "section-tagline", aboutInfo.tagline),
   );
   header.append(headerText);
   container.append(header);
 
   for (const paragraph of aboutInfo.bio) {
-    container.append(el("p", "section-paragraph", paragraph));
+    container.append(richEl("p", "section-paragraph", paragraph));
   }
 
   if (links.length) {
@@ -85,7 +85,7 @@ export function renderAbout(): HTMLElement {
   if (aboutInfo.funFacts?.length) {
     container.append(el("h3", "section-subheading", "Fun Facts"));
     const list = el("ul", "bullet-list");
-    for (const fact of aboutInfo.funFacts) list.append(el("li", undefined, fact));
+    for (const fact of aboutInfo.funFacts) list.append(richEl("li", undefined, fact));
     container.append(list);
   }
   return container;
@@ -97,10 +97,10 @@ export function renderEducation(): HTMLElement {
     const card = el("article", "entry-card");
     card.append(el("h3", "entry-card__title", entry.credential));
     card.append(el("p", "entry-card__meta", `${entry.institution} · ${entry.startDate}–${entry.endDate}`));
-    if (entry.description) card.append(el("p", "section-paragraph", entry.description));
+    if (entry.description) card.append(richEl("p", "section-paragraph", entry.description));
     if (entry.highlights?.length) {
       const list = el("ul", "bullet-list");
-      for (const h of entry.highlights) list.append(el("li", undefined, h));
+      for (const h of entry.highlights) list.append(richEl("li", undefined, h));
       card.append(list);
     }
     container.append(card);
@@ -117,10 +117,10 @@ export function renderExperience(): HTMLElement {
       .filter(Boolean)
       .join(" · ");
     card.append(el("p", "entry-card__meta", metaParts));
-    card.append(el("p", "section-paragraph", entry.summary));
+    card.append(richEl("p", "section-paragraph", entry.summary));
     if (entry.highlights?.length) {
       const list = el("ul", "bullet-list");
-      for (const h of entry.highlights) list.append(el("li", undefined, h));
+      for (const h of entry.highlights) list.append(richEl("li", undefined, h));
       card.append(list);
     }
     if (entry.technologies?.length) {
@@ -182,5 +182,14 @@ export function renderLinks(): HTMLElement {
     list.append(row);
   }
   container.append(list);
+  return container;
+}
+
+/** The placeholder shown for a section that is still being written (see SectionMeta.comingSoon). */
+export function renderComingSoon(message: string): HTMLElement {
+  const container = el("div", "section-content coming-soon");
+  container.append(el("div", "coming-soon__icon", "🚧"));
+  container.append(el("h3", "coming-soon__title", "Under Construction"));
+  container.append(richEl("p", "coming-soon__message", message));
   return container;
 }
