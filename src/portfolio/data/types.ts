@@ -1,4 +1,10 @@
 /**
+ * Text fields on these types (bios, descriptions, bullet points, summaries)
+ * can use inline styling:
+ *   **bold**   *emphasis*   `code`   [link text](https://example.com)
+ * and a backslash shows a symbol literally, e.g. \* for a plain asterisk.
+ * Titles, names, dates and tags are always plain text.
+ *
  * Shared content types for all portfolio data. Game/UI systems should only
  * ever depend on these shapes, never on hard-coded content, so that adding
  * or editing portfolio content never requires touching engine code.
@@ -17,6 +23,8 @@ export interface ProjectLinks {
   github?: string;
   demo?: string;
   website?: string;
+  /** A PDF (or other file) of a paper or report; import it with `?url` so the build bundles it. */
+  paper?: string;
 }
 
 export interface ProjectMedia {
@@ -27,8 +35,14 @@ export interface ProjectMedia {
 export interface Project {
   id: string;
   title: string;
+  /** When it was done, e.g. "Sept. – Dec. 2024". Shown under the title. */
+  date?: string;
   shortDescription: string;
   description: string;
+  /** Key points shown as bullets under the description. */
+  highlights?: string[];
+  /** A short extra badge beside "Featured", e.g. "Scored 100%". */
+  badge?: string;
   technologies: string[];
   links?: ProjectLinks;
   media?: ProjectMedia;

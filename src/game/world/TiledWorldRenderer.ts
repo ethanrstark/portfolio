@@ -38,11 +38,11 @@ export function buildWorld(scene: Phaser.Scene): BuiltWorld {
   buildGroundLayers(scene, draw);
 
   for (const s of BUILDING_SPRITES) {
-    // Ground-level layers sit under the player; everything else is sorted by
-    // its object's front edge (see TileSprite.sortBottom) against Stitch's
-    // feet, so he walks behind a whole house and in front of it as one unit.
-    // `order` only breaks ties between sprites sharing a sort edge.
-    draw(s, s.groundLevel ? DEPTH.GROUND_DECOR + s.order * 0.01 : DEPTH.WORLD + s.sortBottom + s.order * 0.001);
+    // Ground-level layers and walk-over decoration sit under the player;
+    // everything else is sorted by its object's front edge (see
+    // TileSprite.sortBottom) against Stitch's feet, so he walks behind a whole
+    // house and in front of it as one unit. `order` only breaks ties.
+    draw(s, spriteDepth(s));
   }
 
   const obstacles = buildColliders(scene);
@@ -50,6 +50,13 @@ export function buildWorld(scene: Phaser.Scene): BuiltWorld {
 
   scene.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
   return { obstacles, doors };
+}
+
+function spriteDepth(s: TileSprite): number {
+  if (s.groundLevel) return DEPTH.GROUND_DECOR + s.order * 0.01;
+  // Walk-over decoration stays under Stitch at all times, but still stacks by y among its own kind.
+  if (s.flatDecor) return DEPTH.GROUND_DECOR + 1 + (s.sortBottom / WORLD_HEIGHT) * 30 + s.order * 0.0001;
+  return DEPTH.WORLD + s.sortBottom + s.order * 0.001;
 }
 
 /**

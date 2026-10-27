@@ -1,7 +1,10 @@
 import type { ResumeInfo } from "./types";
+import resumeUrl from "@/assets/resume/resume.pdf?url";
 
-// PLACEHOLDER — wire `fileUrl` up to a real PDF in assets/ or public/ later.
+// Replace src/assets/resume/resume.pdf with a newer file (keeping the name) and update lastUpdated.
 export const resumeInfo: ResumeInfo = {
-  summary: "[Placeholder] A downloadable resume will be linked here once available.",
-  lastUpdated: "20XX-XX-XX",
+  summary: "Here's my latest resume. Read it below, open, or download a copy.",
+  // Imported (not typed as a path) so the build bundles the file and gives it a working address.
+  fileUrl: resumeUrl,
+  lastUpdated: "2026-10-27",
 };

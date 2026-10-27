@@ -8,6 +8,7 @@ import {
   renderExperience,
   renderSkills,
   renderLinks,
+  renderComingSoon,
 } from "@/ui/panels/sectionContent";
 import { renderProjectViewer } from "@/ui/project-viewer/ProjectViewer";
 import { renderResumeViewer } from "@/ui/resume-viewer/ResumeViewer";
@@ -15,12 +16,13 @@ import { MainMenu } from "@/ui/navigation/MainMenu";
 import type { NavTarget } from "@/ui/navigation/navItems";
 import { Minimap } from "@/ui/minimap/Minimap";
 import { InteractionPrompt } from "@/ui/dialogue/InteractionPrompt";
-import { projects, creativeProjects } from "@/portfolio/data/projects";
+import { projects } from "@/portfolio/data/projects";
 
 const SECTION_RENDERERS: Record<SectionId, () => HTMLElement> = {
   about: renderAbout,
   projects: () => renderProjectViewer(projects),
-  creative: () => renderProjectViewer(creativeProjects),
+  // Switch to renderProjectViewer(creativeProjects) once there is work to show (and drop `comingSoon` in sections.ts).
+  creative: () => renderComingSoon(SECTIONS.creative.comingSoon ?? ""),
   education: renderEducation,
   experience: renderExperience,
   skills: renderSkills,

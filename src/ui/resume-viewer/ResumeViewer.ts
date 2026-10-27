@@ -1,4 +1,4 @@
-import { el, externalLink } from "@/ui/utils";
+import { el, externalLink, richEl } from "@/ui/utils";
 import { resumeInfo } from "@/portfolio/data/resume";
 import { experience } from "@/portfolio/data/experience";
 import { education } from "@/portfolio/data/education";
@@ -12,23 +12,33 @@ import { skills } from "@/portfolio/data/skills";
  */
 export function renderResumeViewer(): HTMLElement {
   const container = el("div", "section-content resume-viewer");
-  container.append(el("p", "section-paragraph", resumeInfo.summary));
+  container.append(richEl("p", "section-paragraph", resumeInfo.summary));
   container.append(el("p", "resume-viewer__updated", `Last updated: ${resumeInfo.lastUpdated}`));
 
-  if (resumeInfo.fileUrl) {
-    const actions = el("div", "resume-viewer__actions");
-    actions.append(externalLink("Download Resume (PDF) ↗", resumeInfo.fileUrl, "link-pill link-pill--primary"));
-    container.append(actions);
+  const fileUrl = resumeInfo.fileUrl;
+  if (!fileUrl) {
+    container.append(el("p", "resume-viewer__placeholder", "[Placeholder] A downloadable PDF will be linked here."));
+    container.append(renderAtAGlance());
+    return container;
+  }
 
+  const actions = el("div", "resume-viewer__actions");
+  actions.append(externalLink("Open in New Tab ↗", fileUrl, "link-pill link-pill--primary"));
+  const download = el("a", "link-pill", "Download PDF");
+  download.href = fileUrl;
+  download.download = "resume.pdf";
+  actions.append(download);
+  container.append(actions);
+
+  // Phones and some browsers have no built-in PDF viewer, so they only get the buttons above.
+  if (navigator.pdfViewerEnabled !== false) {
     const embed = el("iframe", "resume-viewer__embed");
-    embed.src = resumeInfo.fileUrl;
+    embed.src = `${fileUrl}#view=FitH&navpanes=0`;
     embed.title = "Resume preview";
     container.append(embed);
   } else {
-    container.append(el("p", "resume-viewer__placeholder", "[Placeholder] A downloadable PDF will be linked here."));
-    container.append(renderAtAGlance());
+    container.append(el("p", "resume-viewer__placeholder", "Your browser can't show PDFs here, so use the buttons above."));
   }
-
   return container;
 }
 

@@ -1,6 +1,5 @@
-import "@fontsource/pixelify-sans/latin-400.css";
-import "@fontsource/pixelify-sans/latin-600.css";
-import "@fontsource/pixelify-sans/latin-700.css";
+import "@fontsource/jersey-10/latin-400.css";
+import "@fontsource/dotgothic16/latin-400.css";
 import Phaser from "phaser";
 import { BootScene } from "@/game/scenes/BootScene";
 import { WorldScene } from "@/game/scenes/WorldScene";
