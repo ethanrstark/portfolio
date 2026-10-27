@@ -33,8 +33,14 @@ export interface ProjectMedia {
 export interface Project {
   id: string;
   title: string;
+  /** When it was done, e.g. "Sept. – Dec. 2024". Shown under the title. */
+  date?: string;
   shortDescription: string;
   description: string;
+  /** Key points shown as bullets under the description. */
+  highlights?: string[];
+  /** A short extra badge beside "Featured", e.g. "Scored 100%". */
+  badge?: string;
   technologies: string[];
   links?: ProjectLinks;
   media?: ProjectMedia;

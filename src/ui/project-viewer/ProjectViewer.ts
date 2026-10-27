@@ -13,6 +13,15 @@ export function renderProjectViewer(items: Project[]): HTMLElement {
   return container;
 }
 
+/** The "Featured" badge and any custom badge, or null when the project has neither. */
+function badgesFor(project: Project): HTMLElement | null {
+  if (!project.featured && !project.badge) return null;
+  const row = el("div", "project-card__badges");
+  if (project.featured) row.append(el("span", "project-card__badge", "★ Featured"));
+  if (project.badge) row.append(el("span", "project-card__badge project-card__badge--note", project.badge));
+  return row;
+}
+
 function sortedByFeatured(items: Project[]): Project[] {
   return [...items].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
 }
@@ -27,8 +36,10 @@ function showList(container: HTMLElement, items: Project[]): void {
   const grid = el("div", "project-grid");
   for (const project of sortedByFeatured(items)) {
     const card = el("article", "project-card");
-    if (project.featured) card.append(el("span", "project-card__badge", "★ Featured"));
+    const badges = badgesFor(project);
+    if (badges) card.append(badges);
     card.append(el("h3", "project-card__title", project.title));
+    if (project.date) card.append(el("p", "project-card__date", project.date));
     card.append(richEl("p", "project-card__desc", project.shortDescription));
 
     if (project.technologies.length) {
@@ -56,10 +67,17 @@ function showDetail(container: HTMLElement, project: Project, allItems: Project[
   const detail = el("div", "project-detail");
   const titleRow = el("div", "project-detail__title-row");
   titleRow.append(el("h3", "project-detail__title", project.title));
-  if (project.featured) titleRow.append(el("span", "project-card__badge", "★ Featured"));
+  const badges = badgesFor(project);
+  if (badges) titleRow.append(badges);
   detail.append(titleRow);
+  if (project.date) detail.append(el("p", "project-card__date", project.date));
 
   detail.append(richEl("p", "section-paragraph", project.description));
+  if (project.highlights?.length) {
+    const list = el("ul", "bullet-list");
+    for (const point of project.highlights) list.append(richEl("li", undefined, point));
+    detail.append(list);
+  }
 
   if (project.technologies.length) {
     const tags = el("div", "tag-row");

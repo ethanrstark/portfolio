@@ -960,11 +960,29 @@ code {
   line-height: 18px;
 }
 
+.project-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.project-card__badge--note {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.project-card__date {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.3;
+}
+
 .project-detail__title-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 4px 12px;
+  margin-bottom: 4px;
 }
 
 .project-detail__title {
