@@ -65,23 +65,6 @@ export function renderAbout(): HTMLElement {
     container.append(richEl("p", "section-paragraph", paragraph));
   }
 
-  if (links.length) {
-    const quickLinks = el("div", "about-quick-links");
-    for (const link of links) {
-      const item = el("a", "about-quick-links__item");
-      item.append(linkIcon(link.kind));
-      item.href = link.url;
-      item.title = link.label;
-      item.setAttribute("aria-label", link.label);
-      if (link.kind !== "email") {
-        item.target = "_blank";
-        item.rel = "noopener noreferrer";
-      }
-      quickLinks.append(item);
-    }
-    container.append(quickLinks);
-  }
-
   if (aboutInfo.funFacts?.length) {
     container.append(el("h3", "section-subheading", "Fun Facts"));
     const list = el("ul", "bullet-list");

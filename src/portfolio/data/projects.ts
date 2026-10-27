@@ -1,5 +1,6 @@
 import type { Project } from "./types";
 import workloadPaper from "@/assets/projects/pbbs_benchmarking/workload_characterization_paper.pdf?url";
+import educationRecPaper from "@/assets/projects/ml_education_rec/education_recommendation_system_report.pdf?url";
 
 // Text fields can use **bold**, *emphasis*, `code` and [links](url) — see types.ts.
 // Add `links` (github / demo / website / paper) and `media.images` to any project and the UI shows them.
@@ -10,7 +11,7 @@ export const projects: Project[] = [
   {
     id: "scriptorium",
     title: "Scriptorium — Online Code Execution Platform",
-    date: "Oct. – Dec. 2024",
+    date: "Oct. - Dec. 2024",
     shortDescription: "A full-stack platform for running code in the browser and sharing it with others, built with a 3-person team.",
     description:
       "A code execution and content-sharing platform where users write and run programs, then share them through posts and comments. Built with a 3-person team as a full-stack TypeScript application.",
@@ -26,7 +27,7 @@ export const projects: Project[] = [
   {
     id: "marketplace-app",
     title: "Marketplace App — Java / Spring Boot",
-    date: "Original: Sept. – Dec. 2022 · Modernization: Sept. 2026 – Present",
+    date: "Original: Sept. - Dec. 2022 · Modernization: Sept. 2026 - Present",
     shortDescription: "An online marketplace built with a 7-person team using Clean Architecture, now being rebuilt on Spring Boot.",
     description:
       "An online marketplace designed and built in Java with a 7-person team, applying object-oriented design, SOLID principles and design patterns. It earned an **A+**, and I'm now modernizing it into a production-style Spring Boot backend.",
@@ -57,7 +58,7 @@ export const projects: Project[] = [
   {
     id: "workload-characterization",
     title: "Single-Core Workload Characterization",
-    date: "Jan. – Feb. 2025",
+    date: "Jan. - Feb. 2025",
     shortDescription: "A performance study of the PBBS benchmark suite on simulated single-core systems.",
     description:
       "A workload characterization of the Problem-Based Benchmark Suite (PBBS) run in the gem5 simulator on different single-core systems, with the findings written up as a research report.",
@@ -72,7 +73,7 @@ export const projects: Project[] = [
   {
     id: "fuse-file-system",
     title: "FUSE File System",
-    date: "Nov. – Dec. 2024",
+    date: "Nov. - Dec. 2024",
     shortDescription: "A working file system in C built on FUSE, with its own mkfs tool.",
     description:
       "A file system written in C using FUSE, with the core operations needed to create, read, write and manage files and directories.",
@@ -86,7 +87,7 @@ export const projects: Project[] = [
   {
     id: "network-stack-router",
     title: "Network Stack & IPv4 Router",
-    date: "Sept. – Nov. 2024",
+    date: "Sept. - Nov. 2024",
     shortDescription: "A C++ network stack and IPv4 router that forwards packets across multiple interfaces.",
     description:
       "A network stack and IPv4 router in C++ that handles Ethernet frames, resolves addresses with ARP, and forwards packets between hosts and next-hop routers.",
@@ -100,7 +101,7 @@ export const projects: Project[] = [
   {
     id: "threading-library",
     title: "User-Level Threading Library",
-    date: "Sept. – Oct. 2024",
+    date: "Sept. - Oct. 2024",
     shortDescription: "A threading library for Linux in C with cooperative and preemptive schedulers.",
     description:
       "A user-level threading library in C on Linux covering thread creation, lifecycle management, context switching, and both cooperative and preemptive scheduling.",
@@ -114,7 +115,7 @@ export const projects: Project[] = [
   {
     id: "education-recommendation",
     title: "Education Platform Recommendation System",
-    date: "Mar. – Apr. 2024",
+    date: "Mar. - Apr. 2024",
     shortDescription: "Three machine-learning models that predict student answers, built with 3 teammates.",
     description:
       "A recommendation system for an education platform, built in Python with 3 teammates by comparing three different machine-learning approaches. The project scored **100%**.",
@@ -124,6 +125,7 @@ export const projects: Project[] = [
       "**Analysis:** used Matplotlib to visualize each model's accuracy and parameters and compare their performance and limitations.",
     ],
     technologies: ["Python", "NumPy", "PyTorch", "scikit-learn", "Matplotlib", "Item Response Theory"],
+    links: { paper: educationRecPaper },
     badge: "Scored 100%",
   },
 ];
