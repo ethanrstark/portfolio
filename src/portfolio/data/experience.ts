@@ -1,6 +1,5 @@
 import type { ExperienceEntry } from "./types";
 
-// PLACEHOLDER CONTENT — replace with real roles, employers, and dates.
 export const experience: ExperienceEntry[] = [
   {
     id: "role-one",

@@ -1,6 +1,5 @@
 import type { SkillCategory } from "./types";
 
-// PLACEHOLDER CONTENT — replace with your actual skill set.
 export const skills: SkillCategory[] = [
   {
     id: "languages",
