@@ -86,11 +86,12 @@ function showDetail(container: HTMLElement, project: Project, allItems: Project[
   }
 
   const links = project.links;
-  if (links?.github || links?.demo || links?.website) {
+  if (links?.github || links?.demo || links?.website || links?.paper) {
     const linkRow = el("div", "project-detail__links");
     if (links.github) linkRow.append(externalLink("GitHub ↗", links.github));
     if (links.demo) linkRow.append(externalLink("Live Demo ↗", links.demo));
     if (links.website) linkRow.append(externalLink("Website ↗", links.website));
+    if (links.paper) linkRow.append(externalLink("Research Paper (PDF) ↗", links.paper));
     detail.append(linkRow);
   }
 

@@ -23,6 +23,8 @@ export interface ProjectLinks {
   github?: string;
   demo?: string;
   website?: string;
+  /** A PDF (or other file) of a paper or report; import it with `?url` so the build bundles it. */
+  paper?: string;
 }
 
 export interface ProjectMedia {

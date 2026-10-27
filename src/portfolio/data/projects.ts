@@ -1,7 +1,8 @@
 import type { Project } from "./types";
+import workloadPaper from "@/assets/projects/pbbs_benchmarking/workload_characterization_paper.pdf?url";
 
 // Text fields can use **bold**, *emphasis*, `code` and [links](url) — see types.ts.
-// Add `links` (github / demo / website) and `media.images` to any project and the UI shows them.
+// Add `links` (github / demo / website / paper) and `media.images` to any project and the UI shows them.
 //
 // Left out on purpose (coursework-scale and overlapping with the systems projects below):
 // Single-Cycle MIPS Processor (Logisim), Makefile Parser (C).
@@ -66,6 +67,7 @@ export const projects: Project[] = [
       "**Automation:** wrote Python scripts to run the benchmarks, collect simulation data and plot trends with statistical analysis.",
     ],
     technologies: ["gem5", "Python", "PBBS", "Performance Analysis", "Computer Architecture"],
+    links: { paper: workloadPaper },
   },
   {
     id: "fuse-file-system",
