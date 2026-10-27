@@ -1,6 +1,5 @@
 import type { EducationEntry } from "./types";
 
-// PLACEHOLDER CONTENT — replace with real institution, dates, and coursework.
 export const education: EducationEntry[] = [
   {
     id: "degree-one",

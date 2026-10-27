@@ -37,7 +37,8 @@ export class WorldScene extends Phaser.Scene {
     this.keyboard = new KeyboardControls(this);
     this.pointer = new PointerControls(this);
     new AudioManager(this);
-    new DebugOverlay(this, doors);
+    // Collider outlines and the "Press C" hint are for development only; visitors never see them.
+    if (import.meta.env.DEV) new DebugOverlay(this, doors);
 
     eventBus.on("ui:panelState", (open) => {
       this.inputEnabled = !open;
