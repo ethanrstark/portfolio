@@ -869,8 +869,7 @@ code {
   font-size: 16px;
 }
 
-.link-pill--primary,
-.project-card__view {
+.link-pill--primary {
   border-image-source: url("../assets/ui/frames/btn-gold.png");
   color: var(--ink);
 }
