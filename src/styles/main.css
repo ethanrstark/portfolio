@@ -689,8 +689,29 @@ dd {
   border-image-source: url("../assets/ui/frames/btn-gold.png");
 }
 
-.links-list__icon {
-  font-size: 20px;
+.link-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  background: currentColor;
+  mask: var(--icon) center / contain no-repeat;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+}
+
+.link-icon-fallback {
+  display: block;
+  width: 24px;
+  text-align: center;
+  font-size: 22px;
+  line-height: 24px;
+}
+
+.link-icon--colour {
+  background: none;
+  mask: none;
+  -webkit-mask: none;
+  object-fit: contain;
 }
 
 .links-list__copy {

@@ -6,14 +6,39 @@ import { skills } from "@/portfolio/data/skills";
 import { links } from "@/portfolio/data/links";
 import type { LinkEntry } from "@/portfolio/data/types";
 
-export const LINK_ICONS: Record<LinkEntry["kind"], string> = {
-  github: "\u{1F419}",
-  linkedin: "\u{1F4BC}",
-  email: "✉️",
-  website: "\u{1F310}",
-  twitter: "\u{1F426}",
-  other: "\u{1F517}",
-};
+const linkIconFiles = import.meta.glob("/src/assets/ui/icons/*.{svg,png}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
+/** Logos that keep their own colours; every other icon is drawn in the surrounding text colour. */
+const FULL_COLOUR_ICONS: LinkEntry["kind"][] = ["linkedin"];
+
+/**
+ * The icon for a link kind, from src/assets/ui/icons/<kind>.svg (or .png).
+ * A kind without a file falls back to other.svg, then to a plain arrow. Single-colour icons are used
+ * as a mask, so they follow the text colour and stay visible on both the dark
+ * buttons and the light cards.
+ */
+export function linkIcon(kind: LinkEntry["kind"]): HTMLElement {
+  const find = (name: string) =>
+    Object.entries(linkIconFiles).find(([path]) => path.split("/").pop()?.replace(/\.\w+$/, "") === name)?.[1];
+  const url = find(kind) ?? find("other");
+
+  // No icon file at all (not even other.svg): a plain arrow keeps the button visible.
+  if (!url) return el("span", "link-icon-fallback", "↗");
+  if (FULL_COLOUR_ICONS.includes(kind)) {
+    const image = el("img", "link-icon link-icon--colour");
+    image.src = url;
+    image.alt = "";
+    return image;
+  }
+  const icon = el("span", "link-icon");
+  icon.style.setProperty("--icon", `url("${url}")`);
+  icon.setAttribute("aria-hidden", "true");
+  return icon;
+}
 
 function initials(name: string): string {
   const words = name.split(/\s+/).filter(Boolean);
@@ -43,7 +68,8 @@ export function renderAbout(): HTMLElement {
   if (links.length) {
     const quickLinks = el("div", "about-quick-links");
     for (const link of links) {
-      const item = el("a", "about-quick-links__item", LINK_ICONS[link.kind]);
+      const item = el("a", "about-quick-links__item");
+      item.append(linkIcon(link.kind));
       item.href = link.url;
       item.title = link.label;
       item.setAttribute("aria-label", link.label);
@@ -132,7 +158,7 @@ export function renderLinks(): HTMLElement {
       anchor.target = "_blank";
       anchor.rel = "noopener noreferrer";
     }
-    anchor.append(el("span", "links-list__icon", LINK_ICONS[link.kind]), el("span", "links-list__label", link.label));
+    anchor.append(linkIcon(link.kind), el("span", "links-list__label", link.label));
     row.append(anchor);
 
     if (link.kind === "email") {

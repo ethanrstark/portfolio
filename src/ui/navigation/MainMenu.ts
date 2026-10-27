@@ -1,6 +1,6 @@
 import { aboutInfo } from "@/portfolio/data/about";
 import { links } from "@/portfolio/data/links";
-import { LINK_ICONS } from "@/ui/panels/sectionContent";
+import { linkIcon } from "@/ui/panels/sectionContent";
 import { NAV_ITEMS, type NavTarget } from "@/ui/navigation/navItems";
 import { el, moveFocusWithArrows, trapTabKey, typewriter } from "@/ui/utils";
 
@@ -104,7 +104,7 @@ export class MainMenu {
   private buildContent(): void {
     const title = el("header", "menu-dialog__title");
     title.append(el("p", "menu-dialog__eyebrow", "Welcome to"));
-    const heading = el("h2", "menu-dialog__heading", "Stitch's World");
+    const heading = el("h2", "menu-dialog__heading", "Ethan's World");
     heading.id = "menu-title";
     title.append(heading);
 
@@ -160,7 +160,8 @@ export class MainMenu {
     if (links.length) {
       const quick = el("div", "menu-dialog__links");
       for (const link of links) {
-        const a = el("a", "btn btn--wood btn--square", LINK_ICONS[link.kind]);
+        const a = el("a", "btn btn--wood btn--square");
+        a.append(linkIcon(link.kind));
         a.href = link.url;
         a.title = link.label;
         a.setAttribute("aria-label", link.label);
