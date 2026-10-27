@@ -17,7 +17,7 @@ export function renderResumeViewer(): HTMLElement {
 
   const fileUrl = resumeInfo.fileUrl;
   if (!fileUrl) {
-    container.append(el("p", "resume-viewer__placeholder", "[Placeholder] A downloadable PDF will be linked here."));
+    container.append(el("p", "resume-viewer__placeholder", "A downloadable PDF isn't available yet. Here is a summary instead."));
     container.append(renderAtAGlance());
     return container;
   }
