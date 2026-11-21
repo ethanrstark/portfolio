@@ -6,7 +6,7 @@ import educationRecPaper from "@/assets/projects/ml_education_rec/education_reco
 // Add `links` (github / demo / website / paper) and `media.images` to any project and the UI shows them.
 //
 // Left out on purpose (coursework-scale and overlapping with the systems projects below):
-// Single-Cycle MIPS Processor (Logisim), Makefile Parser (C).
+// Makefile Parser (C).
 export const projects: Project[] = [
   {
     id: "scriptorium",
@@ -111,6 +111,20 @@ export const projects: Project[] = [
       "**Debugging:** tracked down concurrency bugs and validated behaviour with targeted tests and GDB.",
     ],
     technologies: ["C", "Linux", "Concurrency", "Schedulers", "Signals", "Mutexes", "GDB"],
+  },
+  {
+    id: "mips-processor",
+    title: "Single-Cycle MIPS Processor",
+    date: "Sept. - Dec. 2023",
+    shortDescription: "A single-cycle MIPS processor designed from scratch in Logisim Evolution.",
+    description:
+      "A single-cycle MIPS processor designed and built from scratch in Logisim Evolution for my Computer Organization course, then tested with programs to confirm it follows the MIPS instruction set.",
+    highlights: [
+      "**Components:** built and wired together the ALU, register file, control unit, instruction and data memory, and program counter.",
+      "**Control logic:** designed the control signals that steer the datapath for arithmetic, memory access and branching instructions.",
+      "**Verification:** ran test programs through the simulated processor to check that each instruction behaves correctly.",
+    ],
+    technologies: ["Logisim Evolution", "MIPS", "Digital Logic", "Computer Architecture"],
   },
   {
     id: "education-recommendation",
